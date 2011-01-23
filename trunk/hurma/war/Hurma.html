@@ -19,7 +19,7 @@
 		</noscript>
 
     	<div class="login" id="loginPage">
-    		<div class="header">
+    		<div class="hurma-header">
     			<img src="img/hurma.png" class="logo" width="182" height="50">
     		</div>
 			<table align="center" class="login-panel">
@@ -34,7 +34,6 @@
 				<tr>	
 					<td colspan="2" id="sendButtonContainer"></td>
 				</tr>
-
 				<tr>
 					<td colspan="2" style="color:red;" id="errorLabelContainer"></td>
 				</tr>
@@ -50,14 +49,14 @@
     	</div>
 
     	<div class="configuration">
-    		<div class="header">
+    		<div class="hurma-header">
     			<img src="img/hurma.png" class="logo" width="182" height="50" style="float:left;">
-    			<div style="float:left;padding:27px 10px">Button-Clear</div>
-    			<div style="float:left;padding:27px 10px">Button-Save</div>
-    			<div style="float:left;padding:27px 10px">Button-Load</div>
-    			<div style="float:right;padding:27px 10px;">Button-Logout</div>
+    			<div style="float:left;padding:27px 10px" id="clearButton"></div>
+    			<div style="float:left;padding:27px 10px" id="saveButton"></div>
+    			<div style="float:left;padding:27px 10px" id="loadButton"></div>
+    			<div style="float:right;padding:27px 10px;" id="logoutButton"></div>
     		</div>
-    		<div class="leftPanel">
+    		<div class="leftPanel" id="node">
     		</div>
     		<div class="mainPanel">
     			<div class="network-control-panel">
@@ -65,39 +64,23 @@
     					<table align="left" >
 							<tr>
 								<td style="">Name:</td> 
-								<td >Text Field</td>
-								<td style="padding-left:20px;">Simulation Type - Combo Box</td>
-							</tr>
-							<tr>
+								<td ><div id="nameTextField"></div></td>
+								<td style="padding-left:20px;"><div id="simulationTypeLB"></div></td>
 								<td style="">Duration:</td> 
-								<td >Text Field</td>
+								<td> <div style="float:left;" id="durationHour"> </div> <div style="float:left;" id="durationMinute"></div> <div style="float:left;" id="durationSecond"></div>
 							</tr>
-						</table>
+						</table> 
     				</div>
     				<div style="float:right;">
-    					<div style="padding:2px 5px;float:right;">Button - Run</div>
-    					<div style="padding:2px 5px;float:right;">Button - Pause</div>
-    					<div style="padding:2px 5px;float:right;">Button - Stop</div>
+    					<div style="padding:2px 5px;float:right;" id="runButton"></div>
+    					<div style="padding:2px 5px;float:right;" id="pauseButton"></div>
+    					<div style="padding:2px 5px;float:right;" id="stopButton"></div>
     				</div>
-    				<!--
-    				<table style="width:100%;">
-    					<tr>
-    						<td style="float:left;">
-    							Button - Create </td>
-    						<td style="padding:2px 5px;float:left;">
-    							Topology text-fields</td>
-    						<td style="padding:2px 5px;float:right;">
-    							Button - Run, Pause, Start</td>
-    					</tr>
-    					<tr>
-    						<td style="padding:2px 5px;float:left;">
-    							Button - Load </td>
-    					</tr>
-    				</table>
-    				-->
+    			</div>
+    			<div id="networkTopology">
     			</div>
     		</div>
     	</div>
-
+    	
 	</body>
 </html>
