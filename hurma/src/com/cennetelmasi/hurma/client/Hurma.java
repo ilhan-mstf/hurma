@@ -104,10 +104,6 @@ public class Hurma implements EntryPoint {
                             	sendButton.setEnabled(true);
                                 Configuration config = new Configuration(simulation);
                                 config.onModuleLoad();
-                            	NodeType n1 = new NodeType(1);
-                            	n1.onModuleLoad();
-                            	NodeType n2 = new NodeType(2);
-                            	n2.onModuleLoad();
                             } else {
                                 final VerticalPanel dialogVPanel = new VerticalPanel();
                                 dialogVPanel.add(new HTML("<b>Incorrect username and password!</b>"));
