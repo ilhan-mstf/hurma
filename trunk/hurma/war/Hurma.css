@@ -68,6 +68,10 @@ body {
 	min-height: 500px;
 }
 
+.right {
+	float: right;
+}
+
 .leftPanel {
 	position: absolute;
 	top: 71px;
@@ -91,7 +95,13 @@ body {
 
 .network-control-panel {
 	width: 100%;
-	height: 50px;
+	height: 48px;
+	border-bottom: 1px solid #ddd;
+}
+
+.device-control-panel {
+	width: 100%;
+	height: 48px;
 	border-bottom: 1px solid #ddd;
 }
 

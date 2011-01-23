@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -26,9 +27,9 @@ public class Node implements EntryPoint {
 	public void onModuleLoad() {
 		
 		final DialogBox dialogBox = new DialogBox();
-        dialogBox.setText("Remote Procedure Call");
+        dialogBox.setText("Select Alarms");
         dialogBox.setAnimationEnabled(true);
-        final Button closeButton = new Button("Close");
+        final Button closeButton = new Button("Select");
         closeButton.getElement().setId("closeButton");
         
         // Create a vertical panel to align the check boxes
@@ -37,14 +38,14 @@ public class Node implements EntryPoint {
         dialogVPanel.add(label);
 
         // Add a checkbox of alarm
-        final Vector<CheckBox> hede = new Vector<CheckBox>();
+        final Vector<CheckBox> checkBoxList = new Vector<CheckBox>();
         String[] alarms = {"Alarm 1", "Alarm 2", "Alarm 3", "Alarm 4", "Alarm 5"}; 
         for (int i = 0; i < alarms.length; i++) {
           String alarm = alarms[i];
           CheckBox checkBox = new CheckBox(alarm);
           checkBox.ensureDebugId("alarm" + i);
           dialogVPanel.add(checkBox);
-          hede.add(checkBox);
+          checkBoxList.add(checkBox);
         }
         
         dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
@@ -54,7 +55,7 @@ public class Node implements EntryPoint {
         
 		// Add the disclosure panels to a panel
 		final VerticalPanel vPanel = new VerticalPanel();
-		vPanel.setSpacing(3);
+		vPanel.setSpacing(8);
 		
 		// Create a table to layout the form options
 		final FlexTable layout = new FlexTable();
@@ -62,28 +63,33 @@ public class Node implements EntryPoint {
 		layout.setWidth("185px");
 		
 		final Button removeButton = new Button("Remove");
+		removeButton.setStyleName("right", true);
+		
+		final Image img = new Image("img/" + nodeId + ".jpg");
 		
 		// Add a title to the form
-		layout.setHTML(0, 0, "Device " + nodeId);
+		layout.setHTML(0, 0, "<b>Device " + nodeId + "</b>");
 		layout.setWidget(0, 1, removeButton);
+		layout.setWidget(1, 0, img);
 		
-		final VerticalPanel he = new VerticalPanel();
-		he.add(layout);
+		final VerticalPanel innerPanel = new VerticalPanel();
+		innerPanel.add(layout);
 		
 		// Wrap the contents in a DecoratorPanel
 		final DecoratorPanel decPanel = new DecoratorPanel();
-		decPanel.setWidget(he);
+		decPanel.setWidget(innerPanel);
 		
 		vPanel.add(decPanel);
 		
         closeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 dialogBox.hide();
-                for(int i=0; i<hede.size(); i++) {
-                	if(hede.get(i).getValue()) {
-                		he.add(new HTML(hede.get(i).getHTML()));
+                for(int i=0; i<checkBoxList.size(); i++) {
+                	if(checkBoxList.get(i).getValue()) {
+                		innerPanel.add(new HTML(" > " + checkBoxList.get(i).getHTML()));
                 	}
                 }
+                vPanel.setTitle("Device " + nodeId);
                 RootPanel.get("networkTopology").add(vPanel);
             }
         });
@@ -94,7 +100,6 @@ public class Node implements EntryPoint {
             	try {
 					finalize();
 				} catch (Throwable e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
             }
