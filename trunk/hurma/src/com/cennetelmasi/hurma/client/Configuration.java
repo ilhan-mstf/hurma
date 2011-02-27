@@ -3,10 +3,12 @@ package com.cennetelmasi.hurma.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ListBox;
@@ -21,13 +23,17 @@ public class Configuration implements EntryPoint {
     final Button logoutButton = new Button(" Logout ");
     final Button runButton = 	new Button("  Run  ");
     final Button pauseButton = 	new Button(" Pause ");
+    final Button resumeButton = 	new Button(" Resume ");
     final Button stopButton = 	new Button(" Stop ");
     final TextBox nameTextField = new TextBox();
     final ListBox simulationTypeLB = new ListBox(false);
     final TextBox durationHour = new TextBox();
     final TextBox durationMinute = new TextBox();
     final TextBox durationSecond = new TextBox();
+    final Label duration = new Label();
     final String height = new String("15px");
+    
+   
     
     NodeType n1;
     NodeType n2;
@@ -54,18 +60,64 @@ public class Configuration implements EntryPoint {
     }
 	
         public void onModuleLoad(){
-        	
+        	final StringBuffer durationText = new StringBuffer("");
         	final StringBuffer runText = new StringBuffer("Simulation begins!..\n\n");
         	runText.append("Devices in the network:\n");
         	final TextArea text = new TextArea();
         	text.setWidth("190px");
         	text.setHeight("500px");
+        	final int initialLength = runText.length();
         	
         	final Timer timer = new Timer() {
-        		public void run() {
-        			runText.append("alarm\n");
+				@Override
+				public void run() {
+					int i = Random.nextInt();
+        			if(i >0)
+        				runText.append("alarm\n");
         			text.setText(runText.toString());
-        			RootPanel.get("node").add(text);
+        		}
+        	};
+        	
+        	final Timer clock = new Timer(){
+        		int hour = 0, min = 0;
+    			int sec = 0;
+    			
+        		@Override
+				public void run() {
+        			sec++;
+        			if(sec >= 60){
+        				sec = 0;
+        				min++;
+        				if(min >= 60){
+        					min = 0;
+        					hour++;
+        				}
+        			}
+        			
+        			durationText.delete(0, durationText.length());
+        			if(hour < 10)	durationText.append("0");
+        			durationText.append(hour + ":");
+        			if(min < 10)	durationText.append("0");
+        			durationText.append(min + ":");
+        			if(sec < 10)	durationText.append("0");
+        			durationText.append(sec);
+        			duration.setText(durationText.toString());
+        
+        			if(stringToInteger(durationHour.getText()) <= hour 
+        			&& stringToInteger(durationMinute.getText()) <= min 
+        			&& stringToInteger(durationSecond.getText()) <= sec 
+        			){
+        				this.cancel();
+        				timer.cancel();
+        				runText.append("\nTerminated\n");
+            			text.setText(runText.toString());
+            			pauseButton.setEnabled(false);
+                        stopButton.setEnabled(false);
+                        runButton.setEnabled(true);
+                        return;
+            			//RootPanel.get("node").add(text);
+        				
+        			}
         		}
         	};
         	
@@ -93,26 +145,69 @@ public class Configuration implements EntryPoint {
         	RootPanel.get("durationHour").add(durationHour);
         	RootPanel.get("durationMinute").add(durationMinute);
         	RootPanel.get("durationSecond").add(durationSecond);
+        	RootPanel.get("duration").add(duration);
+        	
+        	pauseButton.setEnabled(false);
+            stopButton.setEnabled(false);
         	
         	runButton.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
                 	int size = RootPanel.get("networkTopology").getWidgetCount();
+                	runText.delete(initialLength, runText.length());
                 	for(int i=0; i<size; i++) {
                 		runText.append(RootPanel.get("networkTopology").getWidget(i).getTitle() + "\n");
                 	}
                 	runText.append("\n");
                 	RootPanel.get("node").clear();
+                	RootPanel.get("node").add(text);
                 	//RootPanel.get("devices").setVisible(false);
-                	timer.scheduleRepeating(1000);
+                	clock.run();
+                	timer.scheduleRepeating(2000);
+                	clock.scheduleRepeating(1000);
+                	
+                	pauseButton.setEnabled(true);
+                    stopButton.setEnabled(true);
+                    runButton.setEnabled(false);
+                }
+        	});
+        	
+        	pauseButton.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                	RootPanel.get("pauseButton").remove(pauseButton);
+                	RootPanel.get("pauseButton").add(resumeButton);
+                	timer.cancel();
+                	clock.cancel();
+                	runText.append("Paused\n");
+                	text.setText(runText.toString());
+                	RootPanel.get("node").add(text);
+                	stopButton.setEnabled(false);
+                	
+                }
+        	});
+        	
+        	resumeButton.addClickHandler(new ClickHandler() {
+                public void onClick(ClickEvent event) {
+                	RootPanel.get("pauseButton").add(pauseButton);
+                	RootPanel.get("pauseButton").remove(resumeButton);
+                	timer.scheduleRepeating(2000);
+                	clock.scheduleRepeating(1000);
+                	runText.append("Resumed\n");
+                	text.setText(runText.toString());
+                	RootPanel.get("node").add(text);
+                	stopButton.setEnabled(true);
                 }
         	});
         	
         	stopButton.addClickHandler(new ClickHandler() {
                 public void onClick(ClickEvent event) {
                 	timer.cancel();
+                	clock.cancel();
                 	runText.append("Stop\n");
                 	text.setText(runText.toString());
         			RootPanel.get("node").add(text);
+                	pauseButton.setEnabled(false);
+                    stopButton.setEnabled(false);
+                    runButton.setEnabled(true);
                 }
         	});
         	
@@ -212,7 +307,17 @@ public class Configuration implements EntryPoint {
             		RootPanel.get("loginPage").setVisible(true);
                 }
             });
+        
         }
+        
+        
+        public int stringToInteger(String s) {
+    		int i, j, num = 0;
+    		for(i=s.length()-1, j=1; i>-1; i--, j*=10) {
+    			num += (s.charAt(i) - 48)*j;
+    		}
+    		return num;
+    	}
         
         public void setButtons(boolean bool){
         	saveButton.setEnabled(bool);
