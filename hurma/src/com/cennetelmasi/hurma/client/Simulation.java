@@ -77,4 +77,3 @@ public class Simulation {
 		this.nodeList = nodeList;
 	}
 }
-

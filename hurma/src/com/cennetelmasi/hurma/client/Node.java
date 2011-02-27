@@ -25,7 +25,6 @@ public class Node implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {
-		
 		final DialogBox dialogBox = new DialogBox();
         dialogBox.setText("Select Alarms");
         dialogBox.setAnimationEnabled(true);
@@ -36,7 +35,7 @@ public class Node implements EntryPoint {
         VerticalPanel dialogVPanel = new VerticalPanel();
         HTML label = new HTML("<b>Avaliable alarms for this device</b>");
         dialogVPanel.add(label);
-
+        
         // Add a checkbox of alarm
         final Vector<CheckBox> checkBoxList = new Vector<CheckBox>();
         String[] alarms = {"Alarm 1", "Alarm 2", "Alarm 3", "Alarm 4", "Alarm 5"}; 
@@ -90,7 +89,9 @@ public class Node implements EntryPoint {
                 	}
                 }
                 vPanel.setTitle("Device " + nodeId);
+                vPanel.setStyleName("left", true);
                 RootPanel.get("networkTopology").add(vPanel);
+                
             }
         });
         
@@ -108,4 +109,3 @@ public class Node implements EntryPoint {
 	}
 
 }
-
