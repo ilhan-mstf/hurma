@@ -68,8 +68,19 @@ body {
 	min-height: 500px;
 }
 
+#networkTopology {
+	width:100%;
+	height: 90%;
+	float: left;
+	overflow: scroll;
+	}
+
 .right {
 	float: right;
+}
+
+.left {
+	float: left;	
 }
 
 .leftPanel {
