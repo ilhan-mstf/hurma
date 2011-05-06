@@ -14,9 +14,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class NodeType implements EntryPoint {
 
 	private int nodeTypeId;
+	private String nodeTypeName;
 	
-	NodeType(int t) {
-		nodeTypeId = t;
+	NodeType(String t) {
+		nodeTypeName = t;
 	}
 
 	@Override
@@ -37,7 +38,7 @@ public class NodeType implements EntryPoint {
 		final Image img = new Image("img/" + nodeTypeId + ".jpg");
 		
 		// Add a title to the form
-		layout.setHTML(0, 0, "<b>Device " + nodeTypeId + "</b>");
+		layout.setHTML(0, 0, "<b>" + nodeTypeName + "</b>");
 		layout.setWidget(0, 1, addButton);
 		
 		FlexTable advancedLayout = new FlexTable();

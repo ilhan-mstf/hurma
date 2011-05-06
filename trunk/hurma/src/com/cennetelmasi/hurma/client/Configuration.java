@@ -1,10 +1,12 @@
 package com.cennetelmasi.hurma.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
@@ -32,7 +34,7 @@ public class Configuration implements EntryPoint {
     final TextBox durationSecond = new TextBox();
     final Label duration = new Label();
     final String height = new String("15px");
-    
+    private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
    
     
     NodeType n1;
@@ -42,6 +44,37 @@ public class Configuration implements EntryPoint {
     
     public Configuration(Simulation simulation){
     	
+    	greetingService.nodeTypeNumber(
+        new AsyncCallback<String>() {
+            public void onFailure(Throwable caught) {
+                // Show the RPC error message to the user
+            }
+
+			@Override
+			public void onSuccess(String result) {
+				// TODO Auto-generated method stub
+				int length = Integer.parseInt(result);
+				int i = 0;
+				for(i = 0; i < length; i++){
+					greetingService.nodeTypeName(i,
+					        new AsyncCallback<String>() {
+					            public void onFailure(Throwable caught) {
+					                // Show the RPC error message to the user
+					            }
+
+								@Override
+								public void onSuccess(String result) {
+									// TODO Auto-generated method stub
+									n1 = new NodeType(result);
+							    	n1.onModuleLoad();
+								}
+					    	});
+					
+				}
+			}
+    	});
+    	
+    	
     	this.simulation.setSimulationName(simulation.getSimulationName());
     	this.simulation.setSimulationId(simulation.getSimulationId());
     	this.simulation.setSimulationDurationHour(simulation.getSimulationDurationHour());
@@ -49,14 +82,14 @@ public class Configuration implements EntryPoint {
     	this.simulation.setSimulationDurationSecond(simulation.getSimulationDurationSecond());
     	this.simulation.setNodeList(simulation.getNodeList());
     	
-    	n1 = new NodeType(1);
+    	/*n1 = new NodeType(1);
     	n1.onModuleLoad();
     	n2 = new NodeType(2);
     	n2.onModuleLoad();
     	n3 = new NodeType(3);
     	n3.onModuleLoad();
     	n4 = new NodeType(4);
-    	n4.onModuleLoad();
+    	n4.onModuleLoad();*/
     }
 	
         public void onModuleLoad(){
