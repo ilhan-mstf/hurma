@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeTypes>
+	<nodeType> 
+		<id>1</id>
+		<MIBName>OPENSTAGEPHONE-MIB</MIBName>
+		<name>OpenStagePhone</name> 
+	</nodeType>
+	<nodeType> 
+		<id>2</id>
+		<MIBName>OPENSTAGEPHONE-MIB</MIBName>
+		<name>OpenStagePhone2</name> 
+	</nodeType>
+	<nodeType> 
+		<id>3</id>
+		<MIBName>OPENSTAGEPHONE-MIB</MIBName>
+		<name>Mustafa</name> 
+	</nodeType>
+</nodeTypes>
