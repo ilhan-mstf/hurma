@@ -1,5 +1,7 @@
 package com.cennetelmasi.hurma.server;
 
+import java.io.File;
+
 import com.cennetelmasi.hurma.client.GreetingService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -24,5 +26,40 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 		}
 		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
 				.replaceAll(">", "&gt;");
+	}
+    
+    @Override
+	public String nodeTypeName(int index) {
+		// TODO Auto-generated method stub
+		File file = new File("nodeTypes.xml");
+		NodeTypeParser spe = new NodeTypeParser();
+		spe.parseDocument(file);
+		return NodeTypeParser.nodeTypes.get(index).getName();
+		
+	}
+    
+    public String nodeTypeID(int index) {
+		// TODO Auto-generated method stub
+		File file = new File("nodeTypes.xml");
+		NodeTypeParser spe = new NodeTypeParser();
+		spe.parseDocument(file);
+		return Integer.toString(NodeTypeParser.nodeTypes.get(index).getId());
+	}
+    
+    public String nodeTypeMIB(int index) {
+		// TODO Auto-generated method stub
+		File file = new File("nodeTypes.xml");
+		NodeTypeParser spe = new NodeTypeParser();
+		spe.parseDocument(file);
+		return NodeTypeParser.nodeTypes.get(index).getMIB();
+	}
+
+	@Override
+	public String nodeTypeNumber() {
+		// TODO Auto-generated method stub
+		File file = new File("nodeTypes.xml");
+		NodeTypeParser spe = new NodeTypeParser();
+		spe.parseDocument(file);
+		return Integer.toString(NodeTypeParser.nodeTypes.size());
 	}
 }

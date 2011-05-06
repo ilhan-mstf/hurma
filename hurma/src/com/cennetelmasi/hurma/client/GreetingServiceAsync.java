@@ -7,5 +7,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public interface GreetingServiceAsync {
     void greetServer(String input, String pass, AsyncCallback<String> callback);
+    void nodeTypeName(int index, AsyncCallback<String> asyncCallback);
+    void nodeTypeID(int index, AsyncCallback<String> asyncCallback);
+    void nodeTypeMIB(int index, AsyncCallback<String> asyncCallback);
+    void nodeTypeNumber(AsyncCallback<String> asyncCallback);
 }
 
