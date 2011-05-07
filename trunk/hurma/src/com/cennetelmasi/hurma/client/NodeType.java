@@ -33,7 +33,7 @@ public class NodeType implements EntryPoint {
 		layout.setWidth("182px");
 		
 		final Button addButton = new Button("Add");
-		addButton.setStyleName("right", true);
+		addButton.setStyleName("right");
 		
 		final Image img = new Image("img/" + nodeTypeId + ".jpg");
 		

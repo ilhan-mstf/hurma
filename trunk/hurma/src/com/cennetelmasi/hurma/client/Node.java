@@ -62,7 +62,7 @@ public class Node implements EntryPoint {
 		layout.setWidth("185px");
 		
 		final Button removeButton = new Button("Remove");
-		removeButton.setStyleName("right", true);
+		removeButton.setStyleName("right");
 		
 		final Image img = new Image("img/" + nodeId + ".jpg");
 		
@@ -89,7 +89,7 @@ public class Node implements EntryPoint {
                 	}
                 }
                 vPanel.setTitle("Device " + nodeId);
-                vPanel.setStyleName("left", true);
+                vPanel.setStyleName("left");
                 RootPanel.get("networkTopology").add(vPanel);
                 
             }
