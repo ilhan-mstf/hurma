@@ -1,5 +1,7 @@
 package com.cennetelmasi.hurma.client;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -13,4 +15,6 @@ public interface GreetingService extends RemoteService {
         String nodeTypeID(int index);
         String nodeTypeMIB(int index);
         String nodeTypeNumber();
+        ArrayList<String> getAlarmListName(String mib);
+        ArrayList<String> getObjectList(String mib);
 }

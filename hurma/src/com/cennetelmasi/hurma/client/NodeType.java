@@ -15,14 +15,15 @@ public class NodeType implements EntryPoint {
 
 	private int nodeTypeId;
 	private String nodeTypeName;
+	private String mib;
 	
-	NodeType(String t) {
-		nodeTypeName = t;
+	NodeType(String t, String mib) {
+		this.nodeTypeName = t;
+		this.mib = mib;
 	}
 
 	@Override
-	public void onModuleLoad() {
-		
+	public void onModuleLoad(){
 		// Add the disclosure panels to a panel
 		VerticalPanel vPanel = new VerticalPanel();
 		vPanel.setSpacing(4);
@@ -62,7 +63,7 @@ public class NodeType implements EntryPoint {
 		
         addButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-            	Node n = new Node(nodeTypeId);
+            	Node n = new Node(nodeTypeId, mib);
             	n.onModuleLoad();
             }
         });
