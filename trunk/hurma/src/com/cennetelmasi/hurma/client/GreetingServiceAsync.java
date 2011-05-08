@@ -1,5 +1,7 @@
 package com.cennetelmasi.hurma.client;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
@@ -11,5 +13,7 @@ public interface GreetingServiceAsync {
     void nodeTypeID(int index, AsyncCallback<String> asyncCallback);
     void nodeTypeMIB(int index, AsyncCallback<String> asyncCallback);
     void nodeTypeNumber(AsyncCallback<String> asyncCallback);
+	void getAlarmListName(String mib, AsyncCallback<ArrayList<String>> callback);
+	void getObjectList(String mib, AsyncCallback<ArrayList<String>> callback);
 }
 

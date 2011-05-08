@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class Configuration implements EntryPoint {
     Simulation simulation = new Simulation();
+    public int i;
 	final Button saveButton = 	new Button("  Save  ");
     final Button clearButton = 	new Button(" Clear ");
     final Button loadButton = 	new Button("  Load  ");
@@ -43,33 +44,32 @@ public class Configuration implements EntryPoint {
     NodeType n4;
     
     public Configuration(Simulation simulation){
-    	
-    	greetingService.nodeTypeNumber(
-        new AsyncCallback<String>() {
+    	greetingService.nodeTypeNumber(new AsyncCallback<String>() {
             public void onFailure(Throwable caught) {
                 // Show the RPC error message to the user
             }
 
 			@Override
 			public void onSuccess(String result) {
-				// TODO Auto-generated method stub
 				int length = Integer.parseInt(result);
-				int i = 0;
-				for(i = 0; i < length; i++){
+				
+				for(i = 0; i < length - 1; i++){
 					greetingService.nodeTypeName(i,
 					        new AsyncCallback<String>() {
-					            public void onFailure(Throwable caught) {
-					                // Show the RPC error message to the user
-					            }
-
+					            public void onFailure(Throwable caught){}
 								@Override
-								public void onSuccess(String result) {
-									// TODO Auto-generated method stub
-									n1 = new NodeType(result);
-							    	n1.onModuleLoad();
+								public void onSuccess(final String result) {
+									greetingService.nodeTypeMIB(i,
+											new AsyncCallback<String>() {
+									        	public void onFailure(Throwable caught) {}
+												@Override
+												public void onSuccess(String mib) {
+													n1 = new NodeType(result, mib);
+											    	n1.onModuleLoad();
+												}
+									});
 								}
-					    	});
-					
+					    	});					
 				}
 			}
     	});
@@ -81,15 +81,6 @@ public class Configuration implements EntryPoint {
     	this.simulation.setSimulationDurationMinute(simulation.getSimulationDurationMinute());
     	this.simulation.setSimulationDurationSecond(simulation.getSimulationDurationSecond());
     	this.simulation.setNodeList(simulation.getNodeList());
-    	
-    	/*n1 = new NodeType(1);
-    	n1.onModuleLoad();
-    	n2 = new NodeType(2);
-    	n2.onModuleLoad();
-    	n3 = new NodeType(3);
-    	n3.onModuleLoad();
-    	n4 = new NodeType(4);
-    	n4.onModuleLoad();*/
     }
 	
         public void onModuleLoad(){
