@@ -51,14 +51,18 @@
     	<div class="configuration">
     		<div class="hurma-header">
     			<img src="img/hurma.png" class="logo" width="182" height="50" style="float:left;">
-    			<div style="float:left;padding:27px 10px" id="clearButton"></div>
-    			<div style="float:left;padding:27px 10px" id="saveButton"></div>
-    			<div style="float:left;padding:27px 10px" id="loadButton"></div>
-    			<div style="float:right;padding:27px 10px;" id="logoutButton"></div>
+    			<div class="simulation-options left">
+    				<div class="s-o"><b>Simulation Options:</b></div>
+	    			<div class="s-o" id="clearButton"></div>
+	    			<div class="s-o" id="saveButton"></div>
+	    			<div class="s-o" id="loadButton"></div>
+	    		</div>
+    			<div style="float:right;padding:23px 10px;" id="logoutButton"></div>
     		</div>
     		<div class="leftPanel" >
     			<div class="device-control-panel">
-    				<div style="padding:14px 10px;font-size:1.2em;color:#6d1d1d" id="devices"><b>Devices</b></div>
+    				<div class="devices-text left" id="devices"><b>Devices</b></div>
+    				<div class="right" id="addNewDevice"></div>
     			</div>
     			<div id="node">
     			</div>

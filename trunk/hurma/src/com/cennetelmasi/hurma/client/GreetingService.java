@@ -11,10 +11,11 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("greet")
 public interface GreetingService extends RemoteService {
         String greetServer(String name, String pass);
-        String nodeTypeName(int index);
-        String nodeTypeID(int index);
-        String nodeTypeMIB(int index);
+        //String nodeTypeName(int index);
+        //String nodeTypeID(int index);
+        //String nodeTypeMIB(int index);
         String nodeTypeNumber();
+        String[] getNodeTypeValues(int index);
         ArrayList<String> getAlarmListName(String mib);
         ArrayList<String> getObjectList(String mib);
 }
