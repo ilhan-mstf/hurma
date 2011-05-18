@@ -14,56 +14,83 @@ import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 
 public class Node implements EntryPoint {
 
+	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
 	private int nodeId;
 	private String mib;
-	private VerticalPanel dialogVPanel;
-	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);	
+	
+	private VerticalPanel[] dialogVPanel = new VerticalPanel[4];
+	private HorizontalPanel dialogHPanel = new HorizontalPanel();
+	
 	Node(int t, String mib) {
 		this.nodeId = t;
 		this.mib = mib;
 	}
+	
+	/**
+	 * Firstly it creates a pop dialog box
+	 * shows alarms and required fields and
+	 * then it creates the node on the screen.
+	 */
 
 	@Override
 	public void onModuleLoad() {
+		// create dialogBox
 		final DialogBox dialogBox = new DialogBox();
-        dialogBox.setText("Select Alarms");
+        dialogBox.setText("Select alarms and fill required fields.");
         dialogBox.setAnimationEnabled(true);
-        final Button closeButton = new Button("Select");
+        
+        // create Buttons
+        final Button closeButton = new Button("OK");
         final Button cancelButton = new Button("Cancel");
         closeButton.getElement().setId("closeButton");
         cancelButton.getElement().setId("cancelButton");
         
-        // Create a vertical panel to align the check boxes
-        dialogVPanel = new VerticalPanel();
+        /**
+         * Create four vertical panel
+         * one for alarms and the other
+         * for required fields.
+         * 
+         * Later add these vertical panels to the
+         * horizontal panel and 
+         */
         
+        for(int i=0; i<4; i++)
+        	dialogVPanel[i] = new VerticalPanel();
+        
+        // first vertical panel
         HTML label = new HTML("<b>Avaliable alarms for this device</b>");
-        dialogVPanel.add(label);
+        dialogVPanel[0].add(label);
         
-		// Add a checkbox of alarm
-        dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_LEFT);
+        // Create list of alarms and properties
         final Vector<CheckBox> checkBoxList = new Vector<CheckBox>();
         final Vector<TextBox> propertyList = new Vector<TextBox>();
+        
+		// Add a checkbox of alarm
+        // Make server call
         greetingService.getAlarmListName(mib, new AsyncCallback<ArrayList<String>>() {
             public void onFailure(Throwable caught) {
-                // Show the RPC error message to the user
+                // TODO Show the RPC error message to the user
             }
 
 			@Override
 			public void onSuccess(ArrayList<String> alarms) {
-				for (int i = 0; i < alarms.size(); i++) {
+				int size = alarms.size();
+				for (int i = 0; i < size; i++) {
 			    	String alarm = alarms.get(i);
 			        CheckBox checkBox = new CheckBox(alarm);
 			        i++;
 			        checkBox.getElement().setId(alarms.get(i));
 			        checkBox.ensureDebugId(alarms.get(i));
-			        dialogVPanel.add(checkBox);
+			        dialogVPanel[0].add(checkBox);
 			        checkBoxList.add(checkBox);
 			    }
 				greetingService.getObjectList(mib, new AsyncCallback<ArrayList<String>>() {
@@ -72,26 +99,38 @@ public class Node implements EntryPoint {
 		            }
 					@Override
 					public void onSuccess(ArrayList<String> objects) {
-						for (int i = 0; i < objects.size(); i++) {
+						HTML label = new HTML("<b>Required Fields</b>");
+						dialogVPanel[1].add(label);
+						int size = objects.size();
+						int max = size/4+1;
+						for (int i = 0, j = 1; i < size; i++) {
 					    	String property = objects.get(i);
-					    	HTML label = new HTML("<b>"+ property +"</b>");
-					        dialogVPanel.add(label);
+					    	label = new HTML("<b>"+ property +"</b>");
+					        dialogVPanel[j].add(label);
 					        TextBox field = new TextBox();
 					        field.getElement().setTitle(property);
 					        propertyList.add(field);
-					        dialogVPanel.add(field);
+					        dialogVPanel[j].add(field);
 					        //dialogVPanel.add("<br />");
+					        // TODO there will be bug here...
+					        if(i%5==0) j++;
 					    }
 					}
 		        });
 			}
         });
-        /**/
         
-        dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
-        dialogVPanel.add(closeButton);
-        dialogBox.setWidget(dialogVPanel);
+        // Add all panels
+        dialogVPanel[3].add(closeButton);
+        dialogVPanel[3].add(cancelButton);
+        for(int i=0; i<4; i++)
+        	dialogHPanel.add(dialogVPanel[i]);
+        dialogBox.setWidget(dialogHPanel);
         dialogBox.center();
+        
+        /**
+         * Node starts here...
+         */
         
 		// Add the disclosure panels to a panel
 		final VerticalPanel vPanel = new VerticalPanel();
@@ -135,7 +174,6 @@ public class Node implements EntryPoint {
                 vPanel.setTitle("Device " + nodeId);
                 vPanel.setStyleName("left");
                 RootPanel.get("networkTopology").add(vPanel);
-                
             }
         });
         

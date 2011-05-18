@@ -33,7 +33,7 @@ public class Hurma implements EntryPoint {
 
     public void onModuleLoad(){
     	
-        final Button sendButton = new Button("Send");
+        final Button sendButton = new Button("Login");
         final TextBox nameField = new TextBox();
         final PasswordTextBox passField = new PasswordTextBox();
         nameField.setText("Hurma");
@@ -73,7 +73,7 @@ public class Hurma implements EntryPoint {
             public void onKeyUp(KeyUpEvent event) {
 	    		System.out.println("key pressed");
 	            if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-	                    sendNameToServer();
+	            	sendNameToServer();
 	            }
             }
 
@@ -95,16 +95,16 @@ public class Hurma implements EntryPoint {
                         }
 
                         public void onSuccess(String result) {
-                            dialogBox.setText("Login Failure");
-                            serverResponseLabel.removeStyleName("serverResponseLabelError");
-                            serverResponseLabel.setHTML(result);
-                            
                             if(result.equals("true")) {
                             	RootPanel.get("loginPage").setVisible(false);
                             	sendButton.setEnabled(true);
                                 Configuration config = new Configuration(simulation);
                                 config.onModuleLoad();
                             } else {
+                                dialogBox.setText("Login Failure");
+                                serverResponseLabel.removeStyleName("serverResponseLabelError");
+                                serverResponseLabel.setHTML(result);
+                                
                                 final VerticalPanel dialogVPanel = new VerticalPanel();
                                 dialogVPanel.add(new HTML("<b>Incorrect username and password!</b>"));
                                 dialogVPanel.addStyleName("dialogVPanel");

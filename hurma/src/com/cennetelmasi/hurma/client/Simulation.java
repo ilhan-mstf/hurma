@@ -11,7 +11,7 @@ public class Simulation {
 	private String simulationType;
 	private ArrayList<Node> nodeList;
 	
-	public Simulation(){
+	public Simulation() {
 		simulationName ="";
 		simulationId ="";
 		simulationDurationHour = "00";

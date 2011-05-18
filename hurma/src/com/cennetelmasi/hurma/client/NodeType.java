@@ -17,9 +17,10 @@ public class NodeType implements EntryPoint {
 	private String nodeTypeName;
 	private String mib;
 	
-	NodeType(String t, String mib) {
-		this.nodeTypeName = t;
-		this.mib = mib;
+	NodeType(String[] values) {
+		this.nodeTypeId = Integer.parseInt(values[0]);
+		this.nodeTypeName = values[1];
+		this.mib = values[2];
 	}
 
 	@Override
@@ -31,12 +32,13 @@ public class NodeType implements EntryPoint {
 		// Create a table to layout the form options
 		FlexTable layout = new FlexTable();
 		layout.setCellSpacing(3);
-		layout.setWidth("182px");
+		layout.setWidth("180px");
 		
 		final Button addButton = new Button("Add");
-		addButton.setStyleName("right");
+		addButton.addStyleName("right");
 		
 		final Image img = new Image("img/" + nodeTypeId + ".jpg");
+		img.addStyleName("device-img");
 		
 		// Add a title to the form
 		layout.setHTML(0, 0, "<b>" + nodeTypeName + "</b>");

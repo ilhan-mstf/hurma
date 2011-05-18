@@ -33,40 +33,25 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
 				.replaceAll(">", "&gt;");
 	}
-    
-    @Override
-	public String nodeTypeName(int index) {
-		// TODO Auto-generated method stub
-		File file = new File("nodeTypes.xml");
-		NodeTypeParser spe = new NodeTypeParser();
-		spe.parseDocument(file);
-		return NodeTypeParser.nodeTypes.get(index).getName();
-		
-	}
-    
-    public String nodeTypeID(int index) {
-		// TODO Auto-generated method stub
-		File file = new File("nodeTypes.xml");
-		NodeTypeParser spe = new NodeTypeParser();
-		spe.parseDocument(file);
-		return Integer.toString(NodeTypeParser.nodeTypes.get(index).getId());
-	}
-    
-    public String nodeTypeMIB(int index) {
-		// TODO Auto-generated method stub
-		File file = new File("nodeTypes.xml");
-		NodeTypeParser spe = new NodeTypeParser();
-		spe.parseDocument(file);
-		return NodeTypeParser.nodeTypes.get(index).getMIB();
-	}
 
 	@Override
 	public String nodeTypeNumber() {
-		// TODO Auto-generated method stub
 		File file = new File("nodeTypes.xml");
 		NodeTypeParser spe = new NodeTypeParser();
 		spe.parseDocument(file);
 		return Integer.toString(NodeTypeParser.nodeTypes.size());
+	}
+	
+	public String[] getNodeTypeValues(int index) {
+		File file = new File("nodeTypes.xml");
+		NodeTypeParser ntp = new NodeTypeParser();
+		ntp.parseDocument(file);
+		String[] values = new String[3];
+		int i=0;
+		values[i++] = Integer.toString(NodeTypeParser.nodeTypes.get(index).getId());
+		values[i++] = NodeTypeParser.nodeTypes.get(index).getName();
+		values[i++] = NodeTypeParser.nodeTypes.get(index).getMIB();
+		return values;
 	}
 
 	public ArrayList<Alarm> getAlarmList(String mib) {
@@ -74,10 +59,8 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		try {
 			node = new NodeObj(mib);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (MibLoaderException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return node.getAlarms();
