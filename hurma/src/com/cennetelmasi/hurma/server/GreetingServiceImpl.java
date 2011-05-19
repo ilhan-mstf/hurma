@@ -110,6 +110,7 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 				MIBObject obj = new MIBObject();
 				obj = node.getMibObjectByOid((MibValue) requiredObjects.get(j));
 				if(!list.contains(obj.getName())){
+					list.add(obj.getOid().toString());
 					list.add(obj.getName());
 				}
 			}

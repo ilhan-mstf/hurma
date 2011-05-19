@@ -19,7 +19,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 
 public class Node implements EntryPoint {
 
@@ -104,11 +103,13 @@ public class Node implements EntryPoint {
 						int size = objects.size();
 						int max = size/4+1;
 						for (int i = 0, j = 1; i < size; i++) {
+							String oid = objects.get(i++);
 					    	String property = objects.get(i);
 					    	label = new HTML("<b>"+ property +"</b>");
 					        dialogVPanel[j].add(label);
 					        TextBox field = new TextBox();
 					        field.getElement().setTitle(property);
+					        field.getElement().setId(oid);
 					        propertyList.add(field);
 					        dialogVPanel[j].add(field);
 					        //dialogVPanel.add("<br />");
