@@ -17,6 +17,11 @@
 			in order for this application to display correctly.
 			</div>
 		</noscript>
+		
+    	<div class="rpc-info" >
+    		<span id="rpcLoad" style="display:none;">Loading...</span>
+    		<span class="serverResponseLabelError" id="rpcError" style="display:none;">Error! Server Connection Failure</span>
+    	</div>
 
     	<div class="login" id="loginPage">
     		<div class="hurma-header">
@@ -48,7 +53,7 @@
 			</div>
     	</div>
 
-    	<div class="configuration">
+    	<div class="configuration" id="configPage">
     		<div class="hurma-header">
     			<img src="img/hurma.png" class="logo" width="182" height="50" style="float:left;">
     			<div class="simulation-options left">

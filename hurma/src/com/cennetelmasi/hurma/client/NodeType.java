@@ -65,10 +65,13 @@ public class NodeType implements EntryPoint {
 		
         addButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
+            	// Loading message
+            	RootPanel.get("rpcLoad").setVisible(true);
+            	// Create Node
             	Node n = new Node(nodeTypeId, mib);
             	n.onModuleLoad();
             }
         });
-
 	}
+
 }
