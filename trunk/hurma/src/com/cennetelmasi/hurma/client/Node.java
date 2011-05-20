@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -20,118 +21,145 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class Node implements EntryPoint {
+/**
+ * Firstly it creates a pop dialog box
+ * shows alarms and required fields and
+ * then it creates the node at network-topology
+ */
 
+public class Node implements EntryPoint {
 	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
 	private int nodeId;
 	private String mib;
+	private int numberOfDevice;
 	
-	private VerticalPanel[] dialogVPanel = new VerticalPanel[4];
-	private HorizontalPanel dialogHPanel = new HorizontalPanel();
-	
-	Node(int t, String mib) {
+	public Node(int t, String mib) {
 		this.nodeId = t;
 		this.mib = mib;
 	}
 	
-	/**
-	 * Firstly it creates a pop dialog box
-	 * shows alarms and required fields and
-	 * then it creates the node on the screen.
-	 */
-
 	@Override
 	public void onModuleLoad() {
-		// create dialogBox
+		
+		/********************
+		 * DialogBox Code   *
+		 ********************/
+		
+        // Create dialogBox, set properties
 		final DialogBox dialogBox = new DialogBox();
         dialogBox.setText("Select alarms and fill required fields.");
+        dialogBox.setGlassEnabled(true);
         dialogBox.setAnimationEnabled(true);
-        
-        // create Buttons
-        final Button closeButton = new Button("OK");
-        final Button cancelButton = new Button("Cancel");
-        closeButton.getElement().setId("closeButton");
-        cancelButton.getElement().setId("cancelButton");
-        
-        /**
-         * Create four vertical panel
-         * one for alarms and the other
-         * for required fields.
-         * 
-         * Later add these vertical panels to the
-         * horizontal panel and 
-         */
-        
-        for(int i=0; i<4; i++)
-        	dialogVPanel[i] = new VerticalPanel();
-        
-        // first vertical panel
-        HTML label = new HTML("<b>Avaliable alarms for this device</b>");
-        dialogVPanel[0].add(label);
+		        
+        /********************************************************************
+         * DialogBox style													*
+         * 																	*
+         * V Panel-0														*
+         * -----------------------------------------------------------------*
+         * H Panel-0														*
+         * -----------------------------------------------------------------*
+         * V Panel-1		| V Panel-2										*
+         * -Alarms...		| H Panel-1										*
+         * -				| ----------------------------------------------*
+         * -				| V Panel-3 	| V Panel-4 	| V Panel-5		*
+         * -				|				|				|				*
+         * -				|				|				|				*
+         * -----------------------------------------------------------------*
+         * H Panel-3														*
+         * OK, Cancel Buttons												*
+         ********************************************************************/
+		
+        // Create Horizontal and Vertical Panels, set properties
+		final VerticalPanel[] dialogVPanel = new VerticalPanel[6];
+		final HorizontalPanel[] dialogHPanel = new HorizontalPanel[3];
+		for(int i=0; i<6; i++)
+			dialogVPanel[i] = new VerticalPanel();
+		for(int i=0; i<3; i++) {
+			dialogHPanel[i] = new HorizontalPanel();
+			dialogHPanel[i].setSpacing(5);
+		}
         
         // Create list of alarms and properties
         final Vector<CheckBox> checkBoxList = new Vector<CheckBox>();
         final Vector<TextBox> propertyList = new Vector<TextBox>();
         
-		// Add a checkbox of alarm
+        HTML label = new HTML("<b>Alarms of device</b><br />");
+        label.addStyleName("label-DialogBox");
+        dialogVPanel[1].add(label);
+		// Add check-boxes of alarms
         // Make server call
         greetingService.getAlarmListName(mib, new AsyncCallback<ArrayList<String>>() {
             public void onFailure(Throwable caught) {
-                // TODO Show the RPC error message to the user
+            	RootPanel.get("rpcLoad").setVisible(false);
+            	RootPanel.get("rpcError").setVisible(true);
             }
 
 			@Override
 			public void onSuccess(ArrayList<String> alarms) {
 				int size = alarms.size();
-				for (int i = 0; i < size; i++) {
+				for(int i = 0; i < size; i++) {
 			    	String alarm = alarms.get(i);
 			        CheckBox checkBox = new CheckBox(alarm);
 			        i++;
 			        checkBox.getElement().setId(alarms.get(i));
 			        checkBox.ensureDebugId(alarms.get(i));
-			        dialogVPanel[0].add(checkBox);
+			        dialogVPanel[1].add(checkBox);
 			        checkBoxList.add(checkBox);
 			    }
 				greetingService.getObjectList(mib, new AsyncCallback<ArrayList<String>>() {
 		            public void onFailure(Throwable caught) {
-		                // Show the RPC error message to the user
+		            	RootPanel.get("rpcLoad").setVisible(false);
+		            	RootPanel.get("rpcError").setVisible(true);
 		            }
 					@Override
 					public void onSuccess(ArrayList<String> objects) {
-						HTML label = new HTML("<b>Required Fields</b>");
-						dialogVPanel[1].add(label);
+				        HTML label = new HTML("<b>Required Fields</b>");
+				        label.addStyleName("label-DialogBox");
+				        dialogVPanel[2].insert(label, 0);
 						int size = objects.size();
-						int max = size/4+1;
-						for (int i = 0, j = 1; i < size; i++) {
+						int max = size/4-1;
+						for(int i = 0, j = 3; i < size; i++) {
 							String oid = objects.get(i++);
 					    	String property = objects.get(i);
-					    	label = new HTML("<b>"+ property +"</b>");
+					    	label = new HTML("<b>"+ property +":</b>");
 					        dialogVPanel[j].add(label);
 					        TextBox field = new TextBox();
 					        field.getElement().setTitle(property);
 					        field.getElement().setId(oid);
 					        propertyList.add(field);
 					        dialogVPanel[j].add(field);
-					        //dialogVPanel.add("<br />");
-					        // TODO there will be bug here...
-					        if(i%5==0) j++;
+					        if(i/2%max==(max-1)) j++;
 					    }
+		            	RootPanel.get("rpcLoad").setVisible(false);
+						dialogBox.center();
 					}
 		        });
 			}
         });
         
-        // Add all panels
-        dialogVPanel[3].add(closeButton);
-        dialogVPanel[3].add(cancelButton);
-        for(int i=0; i<4; i++)
-        	dialogHPanel.add(dialogVPanel[i]);
-        dialogBox.setWidget(dialogHPanel);
-        dialogBox.center();
+        // Create Buttons and set properties
+        final Button closeButton = new Button("OK");
+        final Button cancelButton = new Button("Cancel");
+        closeButton.getElement().setId("closeButton");
+        cancelButton.getElement().setId("cancelButton");
+        closeButton.addStyleName("left");
+        cancelButton.addStyleName("left");
+
+        // Unify all panels and buttons
+        dialogHPanel[2].add(closeButton);
+        dialogHPanel[2].add(cancelButton);
+        for(int i=3; i<6; i++)
+        	dialogHPanel[1].add(dialogVPanel[i]);
+        dialogVPanel[2].add(dialogHPanel[1]);
+        dialogHPanel[0].add(dialogVPanel[1]);
+        dialogHPanel[0].add(dialogVPanel[2]);
+        dialogVPanel[0].add(dialogHPanel[0]);
+        dialogVPanel[0].add(dialogHPanel[2]);
+        dialogBox.setWidget(dialogVPanel[0]);
         
-        /**
-         * Node starts here...
-         */
+		/********************
+		 * NODE Code        *
+		 ********************/
         
 		// Add the disclosure panels to a panel
 		final VerticalPanel vPanel = new VerticalPanel();
@@ -143,7 +171,7 @@ public class Node implements EntryPoint {
 		layout.setWidth("185px");
 		
 		final Button removeButton = new Button("Remove");
-		removeButton.setStyleName("right");
+		removeButton.addStyleName("right");
 		
 		final Image img = new Image("img/" + nodeId + ".jpg");
 		
@@ -152,8 +180,16 @@ public class Node implements EntryPoint {
 		layout.setWidget(0, 1, removeButton);
 		layout.setWidget(1, 0, img);
 		
+		// Add advanced options to form in a disclosure panel
+		final DisclosurePanel advancedDisclosure = new DisclosurePanel("Alarms and Values");
+		advancedDisclosure.setAnimationEnabled(true);
+		advancedDisclosure.ensureDebugId("debugId");
+		final VerticalPanel alarmPanel = new VerticalPanel();
+		advancedDisclosure.setContent(alarmPanel);
+		
 		final VerticalPanel innerPanel = new VerticalPanel();
 		innerPanel.add(layout);
+		innerPanel.add(advancedDisclosure);
 		
 		// Wrap the contents in a DecoratorPanel
 		final DecoratorPanel decPanel = new DecoratorPanel();
@@ -161,22 +197,33 @@ public class Node implements EntryPoint {
 		
 		vPanel.add(decPanel);
 		
+
+		/********************
+		 * BUTTON Handlers  *
+		 ********************/
+		
         closeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 dialogBox.hide();
                 for(int i=0; i<checkBoxList.size(); i++) {
                 	if(checkBoxList.get(i).getValue()) {
-                		innerPanel.add(new HTML(" > " + checkBoxList.get(i).getHTML()));
+                		alarmPanel.add(new HTML(" -> " + checkBoxList.get(i).getHTML()));
                 	}
                 }
                 for(int i=0; i<propertyList.size(); i++){
-                	innerPanel.add(new HTML(propertyList.get(i).getTitle() + ": " + propertyList.get(i).getValue()));
+                	alarmPanel.add(new HTML(propertyList.get(i).getTitle() + ": " + propertyList.get(i).getValue()));
                 }
                 vPanel.setTitle("Device " + nodeId);
                 vPanel.setStyleName("left");
                 RootPanel.get("networkTopology").add(vPanel);
             }
         });
+        
+        cancelButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				dialogBox.hide();
+			}
+		});
         
         removeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {

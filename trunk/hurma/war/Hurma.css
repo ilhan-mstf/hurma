@@ -44,16 +44,19 @@ body {
 	display: block;
 }
 
-.login {
+.login, .configuration {
 	position: absolute;
 	top: 0px;
 	left: 0px;
 	right: 0px;
 	bottom: 0px;
-	z-index: 1;
 	margin: 0px;
 	min-width: 500px;
 	min-height: 500px;
+}
+
+.login {
+	z-index: 1;
 	background-color: #fff;
 }
 
@@ -62,15 +65,7 @@ body {
 }
 
 .configuration {
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	right: 0px;
-	bottom: 0px;
 	display: block;
-	margin: 0px;
-	min-width: 500px;
-	min-height: 500px;
 }
 
 .simulation-options {
@@ -155,9 +150,33 @@ body {
 	font-size: 16pt;
 }
 
+.draggable {
+	position: absolute;
+}
+
+.label-DialogBox {
+	background-color: #1d1d6d;
+	color: #fff;
+	text-align: center;
+}
+
+.rpc-info {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	text-align: center;
+	z-index: 5;
+}
+
+.rpc-info span {
+	background-color: #ffe400;
+	padding: 5px 10px;
+}
+
 .gwt-DialogBox {
-	min-width: 244px;
 	width: auto;
+	height: auto;
 	z-index: 2;
 }
 
@@ -167,8 +186,4 @@ body {
 
 .serverResponseLabelError {
 	color: red;
-}
-
-#closeButton {
-	margin: 15px 6px 6px;
 }
