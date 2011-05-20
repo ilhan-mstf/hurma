@@ -159,6 +159,14 @@ public class Configuration implements EntryPoint {
     	pauseButton.setEnabled(false);
         stopButton.setEnabled(false);
     	
+        addNewDevice.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				NewDevice dv = new NewDevice();
+				dv.onModuleLoad();
+			}
+		});
+        
     	runButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
             	int size = RootPanel.get("networkTopology").getWidgetCount();
