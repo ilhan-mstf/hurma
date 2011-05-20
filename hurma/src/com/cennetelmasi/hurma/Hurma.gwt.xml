@@ -12,7 +12,7 @@
 
 	<!-- Other module inherits                                      -->
 
-	<!-- Specify the app entry point class.                         -->
+	<servlet path="/myFormHandler" class="com.cennetelmasi.hurma.server.MyFormHandler"/>
 	<entry-point class='com.cennetelmasi.hurma.client.Hurma' />
 
 	<!-- Specify the paths for translatable code                    -->
