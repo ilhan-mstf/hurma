@@ -7,12 +7,12 @@
 	</nodeType>
 	<nodeType> 
 		<id>2</id>
-		<MIBName>OPENSTAGEPHONE-MIB</MIBName>
-		<name>OpenStagePhone2</name> 
+		<MIBName>HiPath-MIB</MIBName>
+		<name>HiPath</name> 
 	</nodeType>
 	<nodeType> 
 		<id>3</id>
 		<MIBName>OPENSTAGEPHONE-MIB</MIBName>
-		<name>Mustafa</name> 
+		<name>OpenStagePhone2</name> 
 	</nodeType>
 </nodeTypes>
