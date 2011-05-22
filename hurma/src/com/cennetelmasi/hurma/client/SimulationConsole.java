@@ -133,7 +133,7 @@ public class SimulationConsole implements EntryPoint {
     			&& stringToInteger(simulation.getSimulationDurationMinute()) <= min 
     			&& stringToInteger(simulation.getSimulationDurationSecond()) <= sec ) {
     				this.cancel();
-    				runText.append("\nTerminated.\nSimulation successfully ended.\n");
+    				runText.append("> Simulation successfully ended.");
         			console.setText(runText.toString());
                     return;
     			}
@@ -150,9 +150,11 @@ public class SimulationConsole implements EntryPoint {
         	if(n.isCreated()) {
         		// Values
         		ArrayList<String> values = new ArrayList<String>();
-        		values.add(Integer.toString(n.getId()));
+        		values.add(Integer.toString(n.getNodeId()));
         		values.add(Integer.toString(n.getNumberOfDevice()));
         		values.add(Float.toString(n.getProb()));
+        		values.add(n.getNodeTypeName());
+        		System.out.println("nodeid: "  + n.getId());
         		// Alarms
         		ArrayList<String> selectedAlarms = new ArrayList<String>();
         		for(int j=0; j<n.getCheckBoxList().size(); j++) {
