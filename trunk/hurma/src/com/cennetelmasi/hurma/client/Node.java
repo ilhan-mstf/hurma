@@ -30,6 +30,7 @@ public class Node implements EntryPoint {
 	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
 	private int id;
 	private int nodeId;
+	private String image;
 	private String nodeTypeName;
 	private String mib;
 	private int numberOfDevice;
@@ -40,10 +41,11 @@ public class Node implements EntryPoint {
     private final ArrayList<CheckBox> checkBoxList = new ArrayList<CheckBox>();
     private final ArrayList<TextBox> propertyList = new ArrayList<TextBox>();
 	
-	public Node(int id, String nodeTypeName, String mib) {
+	public Node(int id, String nodeTypeName, String mib, String img) {
 		this.id = id;
 		this.setNodeTypeName(nodeTypeName);
 		this.setMib(mib);
+		this.image = img;
 	}
 	
 	@Override
@@ -192,7 +194,7 @@ public class Node implements EntryPoint {
 		final Button editButton = new Button("Edit");
 		editButton.addStyleName("right");
 		
-		final Image img = new Image("img/" + getId() + ".jpg");
+		final Image img = new Image("img/" + this.image);
 		
 		// Add a title to the form
 		layout.setHTML(0, 0, "<b>" + getNodeTypeName() + " - " + getNodeId() + "</b>");

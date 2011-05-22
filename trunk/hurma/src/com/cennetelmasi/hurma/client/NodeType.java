@@ -76,7 +76,7 @@ public class NodeType implements EntryPoint {
             	// Loading message
             	RootPanel.get("rpcLoad").setVisible(true);
             	// Create Node
-            	Node n = new Node(nodeTypeId, nodeTypeName, mib);
+            	Node n = new Node(nodeTypeId, nodeTypeName, mib, icon);
             	simulation.getNodeList().add(n);
             	n.onModuleLoad();
             }
