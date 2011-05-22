@@ -17,12 +17,14 @@ public class NodeType implements EntryPoint {
 	private int nodeTypeId;
 	private String nodeTypeName;
 	private String mib;
+	private String icon;
 	
-	NodeType(String id, String name, String mib, Simulation simulation) {
+	NodeType(String id, String name, String mib, String img, Simulation simulation) {
 		this.nodeTypeId = Integer.parseInt(id);
 		this.nodeTypeName = name;
 		this.mib = mib;
 		this.simulation = simulation;
+		this.icon = img;
 	}
 
 	@Override
@@ -39,7 +41,7 @@ public class NodeType implements EntryPoint {
 		final Button addButton = new Button("Add");
 		addButton.addStyleName("right");
 		
-		final Image img = new Image("img/" + nodeTypeId + ".jpg");
+		final Image img = new Image("img/" + this.icon);
 		img.addStyleName("device-img");
 		
 		// Add a title to the form
