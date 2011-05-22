@@ -112,6 +112,7 @@ public class NewDevice {
 			public void onSubmitComplete(SubmitCompleteEvent event) {
 				// TODO Auto-generated method stub
 				box.hide(true);
+				Configuration.refreshTheNodeList();
 			}
 		});
 		
