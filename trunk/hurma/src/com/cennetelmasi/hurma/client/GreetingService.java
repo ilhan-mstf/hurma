@@ -22,6 +22,9 @@ public interface GreetingService extends RemoteService {
 		String pause();
 		void resume();
 		String stop();
+		boolean sessionControl();
+		void createSession();
+		void destroySession();
 		
 //        String[] getNodeTypeValues(int index);
 //        String sendSimulationConfiguration(String[] values, String[] alarms, String[] fields);

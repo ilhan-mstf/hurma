@@ -4,9 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import net.percederberg.mibble.MibLoaderException;
 
 import com.cennetelmasi.hurma.client.GreetingService;
+import com.google.gwt.dev.util.collect.HashMap;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -19,6 +23,8 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 	
 	private SimulationEngine se = new SimulationEngine();
 	int id = 0;
+	
+	private HttpSession session;
 
     public String greetServer(String input, String pass) {
     	input = escapeHtml(input);
@@ -160,6 +166,30 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 	public String stop() {
 		se.stop();
 		return getOutputs();
+	}
+
+	@Override
+	public boolean sessionControl() {
+		HttpServletRequest request = this.getThreadLocalRequest();
+    	session = request.getSession();
+		
+		if (session.getAttribute("id") == null) {
+    		return false;
+    	} else {
+    		return true;
+    	}
+	}
+
+	@Override
+	public void destroySession() {
+		session.removeAttribute("id");
+	}
+
+	@Override
+	public void createSession() {
+		if (session.getAttribute("id") == null) {
+    		session.setAttribute("id", new HashMap());
+    	}
 	}
 
 }
