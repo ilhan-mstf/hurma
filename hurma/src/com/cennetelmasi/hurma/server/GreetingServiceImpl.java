@@ -10,7 +10,6 @@ import javax.servlet.http.HttpSession;
 import net.percederberg.mibble.MibLoaderException;
 
 import com.cennetelmasi.hurma.client.GreetingService;
-import com.google.gwt.dev.util.collect.HashMap;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -188,7 +187,7 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 	@Override
 	public void createSession() {
 		if (session.getAttribute("id") == null) {
-    		session.setAttribute("id", new HashMap());
+    		session.setAttribute("id", "user");
     	}
 	}
 
