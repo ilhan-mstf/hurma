@@ -16,8 +16,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class Configuration implements EntryPoint {
-	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
-    Simulation simulation = new Simulation();
+	private final static GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
+    static Simulation simulation = new Simulation();
 	
     final Button saveButton 		= new Button("Save");
     final Button clearButton 		= new Button("Clear");
@@ -53,7 +53,7 @@ public class Configuration implements EntryPoint {
 			     */
 				int size = Integer.parseInt(result.get(0));
 				for(int i=0; i<size; i++) {
-					int index = i*3+1;
+					int index = i*4+1;
 					new NodeType(result.get(index), result.get(index+1), 
 								 result.get(index+2), result.get(index+3), simulation).onModuleLoad();
 				}
@@ -211,5 +211,25 @@ public class Configuration implements EntryPoint {
         });
     
     }
+
+	public static void refreshTheNodeList() {
+		greetingService.getNodeTypes(new AsyncCallback<ArrayList<String>>() {
+			public void onFailure(Throwable caught) {}
+			@Override
+			public void onSuccess(ArrayList<String> result) {
+			    /**
+			     * Result format:
+			     * numberOfNodeTypes, (id, name, mib) ...
+			     */
+				int size = Integer.parseInt(result.get(0));
+				int i = size - 1;
+				int index = i*4+1;
+				new NodeType(result.get(index), result.get(index+1), 
+							 result.get(index+2), result.get(index+3), simulation).onModuleLoad();
+				
+			}
+		});
+		
+	}
 
 }
