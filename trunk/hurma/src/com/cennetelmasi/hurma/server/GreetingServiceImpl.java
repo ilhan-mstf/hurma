@@ -116,6 +116,8 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 				// Set values
 				n.setNumberOfDevices(Integer.parseInt(values.get(1)));
 				n.setProbability(Float.parseFloat(values.get(2)));
+				n.setNodeName(values.get(3));
+				System.out.println("server: " + values.get(3));
 				// Rearrange alarm list
 				ArrayList<Alarm> temp = new ArrayList<Alarm>();
 				for(Alarm a : n.getAlarms())
