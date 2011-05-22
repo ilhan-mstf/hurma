@@ -1,5 +1,5 @@
 package com.cennetelmasi.hurma.server;
-
+/*
 import java.io.IOException;
 import java.util.List;
 
@@ -33,3 +33,4 @@ public class FileUploadServlet extends HttpServlet {
 	}
 
 }
+*/

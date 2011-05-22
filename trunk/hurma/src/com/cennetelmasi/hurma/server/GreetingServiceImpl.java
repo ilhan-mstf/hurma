@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import net.percederberg.mibble.MibLoaderException;
-import net.percederberg.mibble.MibValue;
 
 import com.cennetelmasi.hurma.client.GreetingService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -17,6 +16,9 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implements
                 GreetingService {
+	
+	private SimulationEngine se = new SimulationEngine();
+	int id = 0;
 
     public String greetServer(String input, String pass) {
     	input = escapeHtml(input);
@@ -33,29 +35,35 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
 				.replaceAll(">", "&gt;");
 	}
-
-	@Override
-	public String nodeTypeNumber() {
-		File file = new File("nodeTypes.xml");
-		NodeTypeParser spe = new NodeTypeParser();
-		spe.parseDocument(file);
-		return Integer.toString(NodeTypeParser.nodeTypes.size());
-	}
-	
-	public String[] getNodeTypeValues(int index) {
-		File file = new File("nodeTypes.xml");
+    
+    /**
+     * Return format:
+     * numberOfNodeTypes, (id, name, mib) ...
+     */
+    public ArrayList<String> getNodeTypes() {
+		ArrayList<String> values = new ArrayList<String>();
+    	File file = new File("nodeTypes.xml");
 		NodeTypeParser ntp = new NodeTypeParser();
 		ntp.parseDocument(file);
-		String[] values = new String[3];
-		int i=0;
-		values[i++] = Integer.toString(NodeTypeParser.nodeTypes.get(index).getId());
-		values[i++] = NodeTypeParser.nodeTypes.get(index).getName();
-		values[i++] = NodeTypeParser.nodeTypes.get(index).getMIB();
+		int numberOfNodeTypes = NodeTypeParser.getNodeTypes().size();
+		values.add(Integer.toString(numberOfNodeTypes));
+		for(NodeTypeObject nodeType : NodeTypeParser.getNodeTypes()) {
+			values.add(Integer.toString(nodeType.getId()));
+			values.add(nodeType.getName());
+			values.add(nodeType.getMIB());
+		}
+		System.out.println("server: xml is parsed.");
 		return values;
-	}
-
-	public ArrayList<Alarm> getAlarmList(String mib) {
-		NodeObj node = null;
+    }
+    
+    
+    /**
+     * Return format:
+     * id, numberofAlarms, (AlarmName, AlarmOID), ... (ObjectName, ObjectOID) ...
+     */
+    public ArrayList<String> getNodeObjValues(String mib) {
+		ArrayList<String> values = new ArrayList<String>();
+    	NodeObj node = null;
 		try {
 			node = new NodeObj(mib);
 		} catch (IOException e) {
@@ -63,59 +71,94 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		} catch (MibLoaderException e) {
 			e.printStackTrace();
 		}
-		return node.getAlarms();
-	}
-
-	@Override
-	public ArrayList<String> getAlarmListName(String mib) {
-		ArrayList<String> list = new ArrayList<String>();
-		ArrayList<Alarm> alarms = new ArrayList<Alarm>();
-		NodeObj node = null;
-		try {
-			node = new NodeObj(mib);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (MibLoaderException e) {
-			e.printStackTrace();
-		}
-		alarms = node.getAlarms();
-		
-		for(int i = 0; i < alarms.size(); i++){
-			list.add(alarms.get(i).getName());
-			list.add(alarms.get(i).getOid().toString());
-		}
-		return list;
-	}
-
-	@Override
-	public ArrayList<String> getObjectList(String mib) {
-		ArrayList<String> list = new ArrayList<String>();
-		
-		ArrayList<Alarm> alarms = new ArrayList<Alarm>();
-		NodeObj node = null;
-		try {
-			node = new NodeObj(mib);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (MibLoaderException e) {
-			e.printStackTrace();
-		}
-		alarms = node.getAlarms();
-		for(int i=0; i < alarms.size(); i++){
-			Alarm alarm = new Alarm();
-			alarm = alarms.get(i);
-			ArrayList<Object> requiredObjects = new ArrayList<Object>();
-			requiredObjects = alarm.getRequiredObjects();
-			for(int j = 0; j < requiredObjects.size(); j++){
-				MIBObject obj = new MIBObject();
-				obj = node.getMibObjectByOid((MibValue) requiredObjects.get(j));
-				if(!list.contains(obj.getName())){
-					list.add(obj.getOid().toString());
-					list.add(obj.getName());
+    	// Set id
+    	values.add(Integer.toString(id));
+    	// Add alarm size
+    	values.add(Integer.toString(node.getAlarms().size()));
+    	// Add alarms
+    	for(Alarm alarm : node.getAlarms()) {
+    		values.add(alarm.getName());
+    		values.add(alarm.getOid());
+    	}
+    	// Add required objects
+    	for(Alarm alarm : node.getAlarms()) {
+    		for(Object requiredObject : alarm.getRequiredObjects()) {
+    			MIBObject obj = new MIBObject();
+				obj = node.getMibObjectByOid(requiredObject.toString());
+				if(!values.contains(obj.getName())){
+					values.add(obj.getName());
+					values.add(obj.getOid().toString());
 				}
+    		}
+    	}
+    	se.getNodes().add(node);
+    	System.out.println("server: node created, node id: " + id);
+    	id++;
+    	return values;
+    }
+
+    /**
+     * Argument formats
+     * values : id, numberOfDevices, prob
+     * selectedAlarms : oid, ...
+     * requiredFields : (oid, value) ... 
+     */
+	public void setNodeObjValues(ArrayList<String> values,
+			ArrayList<String> selectedAlarms, ArrayList<String> requiredFields) {
+		for(NodeObj n : se.getNodes()) {
+			if(n.getId() == Integer.parseInt(values.get(0))) {
+				// Set values
+				n.setNumberOfDevices(Integer.parseInt(values.get(1)));
+				n.setProbability(Float.parseFloat(values.get(2)));
+				// Rearrange alarm list
+				ArrayList<Alarm> temp = new ArrayList<Alarm>();
+				for(Alarm a : n.getAlarms())
+					if(selectedAlarms.contains(a.getOid()))
+						temp.add(a);
+				n.setAlarms(temp);
+				// Set MIBObject values
+				int size = requiredFields.size();
+				for(int i=0; i<size; i++) {
+					MIBObject obj = n.getMibObjectByOid(requiredFields.get(i++));
+					obj.setValue(requiredFields.get(i));
+				}
+				System.out.println("server: SNMP Agent is created, node id: " + n.getId());
 			}
 		}
-		
-		return list;
 	}
+	
+	public void deleteNodeObj(String id) {
+		int i;
+		for(i=0; i<se.getNodes().size(); i++)
+			if(se.getNodes().get(i).getId()==Integer.parseInt(id))
+				break;
+		se.getNodes().remove(--i);
+		System.out.println("server: node deleted, node id: " + i);
+	}
+
+	public String getOutputs() {
+		String str = se.getProtocol().getLog().toString();
+		se.getProtocol().setLog(new StringBuffer());
+		return str;
+	}
+
+	public void startSimulation(int time) {
+		System.out.println("server: simulation started.");
+		se.start(time);
+	}
+
+	public String pause() {
+		se.pause();
+		return getOutputs();
+	}
+
+	public void resume() {
+		se.resume();
+	}
+
+	public String stop() {
+		se.stop();
+		return getOutputs();
+	}
+
 }

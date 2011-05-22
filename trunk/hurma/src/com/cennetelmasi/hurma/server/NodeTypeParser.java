@@ -14,11 +14,11 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.io.File;
 
 public class NodeTypeParser extends DefaultHandler{
-	public static List<NodeTypeObject> nodeTypes;
+	private static List<NodeTypeObject> nodeTypes;
 	private String tempVal;
-	public static NodeTypeObject tempNode;
+	private static NodeTypeObject tempNode;
 	
-	public NodeTypeParser(){
+	public NodeTypeParser() {
 		nodeTypes = new ArrayList<NodeTypeObject>();
 	}
 
@@ -27,13 +27,14 @@ public class NodeTypeParser extends DefaultHandler{
 		try {
 			SAXParser sp = spf.newSAXParser();
 			sp.parse(file, this);			
-		}catch(SAXException se) {
+		} catch(SAXException se) {
 			se.printStackTrace();
-		}catch(ParserConfigurationException pce) {
+		} catch(ParserConfigurationException pce) {
 			pce.printStackTrace();
-		}catch (IOException ie) {
+		} catch (IOException ie) {
 			ie.printStackTrace();
-		}}
+		}
+	}
 	
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		tempVal = "";
@@ -63,4 +64,5 @@ public class NodeTypeParser extends DefaultHandler{
 	public static List<NodeTypeObject> getNodeTypes() {
 		return nodeTypes;
 	}
+
 }
