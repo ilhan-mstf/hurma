@@ -131,10 +131,10 @@ public class Protocol {
 		snmp.send(pdu, comtarget);
 		count++;
 		
-		String str = "server: " + count + " -- device " + node.getId() +
-					 " - Sending V2 Trap to " + ipAddress + " on Port " + port;
-		log.append(str+"\n");
-		System.out.println(str);
+		String str = node.getNodeName() + " - " + node.getId() + " : " + trap.getNode().getAlarms().get(0).getName() + "\n";
+		log.append(str);
+		System.out.println("server: " + count + " -- device " + node.getId() +
+				 			" - Sending V2 Trap to " + ipAddress + " on Port " + port);
 		// ResponseEvent respEv = snmp.send(pdu, comtarget);
 		// PDU response = respEv.getResponse();
 		snmp.close();

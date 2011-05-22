@@ -21,6 +21,7 @@ public class NodeObj {
 	private String nodeTypeName;
 	private float probability;
 	private int numberOfDevices;
+	private String nodeName;
 	
 	private String MIB;
 	private ArrayList<MIBObject> mibObjects;
@@ -185,6 +186,14 @@ public class NodeObj {
 
 	public int getNumberOfDevices() {
 		return numberOfDevices;
+	}
+
+	public void setNodeName(String nodeName) {
+		this.nodeName = nodeName;
+	}
+
+	public String getNodeName() {
+		return nodeName;
 	}
 
 }
