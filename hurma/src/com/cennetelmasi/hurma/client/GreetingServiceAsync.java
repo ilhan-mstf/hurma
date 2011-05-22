@@ -20,5 +20,8 @@ public interface GreetingServiceAsync {
 	void pause(AsyncCallback<String> callback);
 	void resume(AsyncCallback<Void> callback);
 	void stop(AsyncCallback<String> callback);
+	void destroySession(AsyncCallback<Void> callback);
+	void sessionControl(AsyncCallback<Boolean> callback);
+	void createSession(AsyncCallback<Void> callback);
     
 }
