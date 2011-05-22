@@ -4,9 +4,22 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
+import java.io.*;
+
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.*;
+
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,74 +30,114 @@ public class MyFormHandler extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final Logger log =
-	      Logger.getLogger(MyFormHandler.class.getName());
-
-	public void doPost(HttpServletRequest req, HttpServletResponse res)
-	      throws ServletException, IOException {
-	    try {
-	      ServletFileUpload upload = new ServletFileUpload();
-	      res.setContentType("text/plain");
-
-	      FileItemIterator iterator = upload.getItemIterator(req);
-	      while (iterator.hasNext()) {
-	        FileItemStream item = iterator.next();
-	        InputStream stream = item.openStream();
-
-	        if (item.isFormField()) {
-	          log.warning("Got a form field: " + item.getFieldName());
-	        } else {
-	          log.warning("Got an uploaded file: " + item.getFieldName() +
-	                      ", name = " + item.getName());
-
-	          // You now have the filename (item.getName() and the
-	          // contents (which you can read from stream). Here we just
-	          // print them back out to the servlet output stream, but you
-	          // will probably want to do something more interesting (for
-	          // example, wrap them in a Blob and commit them to the
-	          // datastore).
-	          int len;
-	          byte[] buffer = new byte[8192];
-	          while ((len = stream.read(buffer, 0, buffer.length)) != -1) {
-	            res.getOutputStream().write(buffer, 0, len);
-	          }
-	        }
-	      }
-	    } catch (Exception ex) {
-	      throw new ServletException(ex);
-	    }
-	  }
-	
-	/*public void doPost(HttpServletRequest req, HttpServletResponse resp)throws ServletException, IOException {
-
-		resp.setContentType("text/html");
-	
-		FileItem uploadItem = getFileItem(req);
-		if(uploadItem == null) {
-			resp.getWriter().write("NO-SCRIPT-DATA");
-			return;
-		}
-
-		resp.getWriter().write(new String(uploadItem.get()));
-	}
-
-	private FileItem getFileItem(HttpServletRequest req) {
-		FileItemFactory factory = new DiskFileItemFactory();
-		ServletFileUpload upload = new ServletFileUpload(factory);
-
+	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		String deviceName = null;
+		String MIBName = null;
+		String image = null;
 		try {
-			List items = upload.parseRequest(req);
-			Iterator it = items.iterator();
-
-			while(it.hasNext()) {
-				FileItem item = (FileItem) it.next();
-				if(!item.isFormField() && "uploadFormElement".equals(item.getFieldName())) {
-					return item;
-				}
+			int state = 0;
+			ServletFileUpload upload = new ServletFileUpload();
+	    	res.setContentType("text/plain");
+	      
+	    	FileItemIterator iterator = upload.getItemIterator(req);
+	    	while (iterator.hasNext()) {
+	    		FileItemStream item = iterator.next();
+	    		InputStream stream = item.openStream();
+	    		BufferedWriter dos;
+	    		
+	    		if (item.isFormField()) {
+	    			if(state++ == 0){
+	    				deviceName = item.getFieldName();
+	    			} else {
+	    				image = item.getFieldName();
+	    			}
+	    		} else {
+	    			MIBName = item.getName();
+	    			File outFile = new File("MIBs\\"+MIBName);
+	    			dos = new BufferedWriter(new FileWriter(outFile));
+	    			int c;
+	    			while((c = stream.read()) != -1){
+	    				dos.write(c);
+	    			}
+	    			dos.close();
+	    		}
+	    	}
+	    	
+	    	System.out.println(deviceName);
+	    	System.out.println(image);
+	    } catch (Exception ex) {
+	    	throw new ServletException(ex);
+	    }
+	    if(deviceName != null && MIBName != null){
+	    	try {
+				saveToXml(deviceName, MIBName, image);
+			} catch (ParserConfigurationException e) {
+				e.printStackTrace();
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			} catch (SAXException e) {
+				e.printStackTrace();
 			}
-		} catch(FileUploadException e){
-			return null;
+	    }
+	   
+	}
+	
+	public static void saveToXml(String device, String mib, String img) throws ParserConfigurationException, TransformerException, SAXException, IOException{
+		File file = new File("nodeTypes.xml");
+		NodeTypeParser spe = new NodeTypeParser();
+		spe.parseDocument(file);
+		int i = NodeTypeParser.nodeTypes.size();
+		int lastId = 1;
+		for(int j = 0; j<i; j++){
+			if(lastId < NodeTypeParser.nodeTypes.get(j).getId())
+				lastId = NodeTypeParser.nodeTypes.get(j).getId();
 		}
-		return null;
-	}*/
+		
+		DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+        Document doc = docBuilder.parse("nodeTypes.xml");
+        Element	root = doc.getDocumentElement();
+          
+        Element nodeType = doc.createElement("nodeType");
+        Element id		 = doc.createElement("id");
+        Element mibName  = doc.createElement("MIBName");
+        Element name 	 = doc.createElement("name");
+        Element image	 = doc.createElement("icon");
+        
+        Text mibNameText = doc.createTextNode("MIBs\\"+mib);
+        Text nameText	 = doc.createTextNode(device);
+        Text imageText	 = doc.createTextNode(img);
+        Text idText		 = doc.createTextNode(Integer.toString(++lastId));
+        
+        id.appendChild(idText);
+        mibName.appendChild(mibNameText);
+        name.appendChild(nameText);
+        image.appendChild(imageText);
+        
+        nodeType.appendChild(id);
+        nodeType.appendChild(mibName);
+        nodeType.appendChild(name);
+        nodeType.appendChild(image);
+        
+        root.appendChild(nodeType);
+        
+        TransformerFactory transfac = TransformerFactory.newInstance();
+		Transformer trans = transfac.newTransformer();
+		trans.setOutputProperty(OutputKeys.INDENT, "yes");
+
+		StringWriter sw = new StringWriter();
+	    StreamResult result = new StreamResult(sw);
+	    DOMSource source = new DOMSource(doc);
+	    trans.transform(source, result);
+	    String xmlString = sw.toString();
+	 
+	    OutputStream f0;
+	    byte buf[] = xmlString.getBytes();
+	    f0 = new FileOutputStream("nodeTypes.xml");
+	    for(i=0;i<buf .length;i++) {
+		   f0.write(buf[i]);
+		}
+		f0.close();
+		buf = null;      
+	}
 }
