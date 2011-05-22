@@ -31,8 +31,8 @@ public class Configuration implements EntryPoint {
     final TextBox durationMinute 	= new TextBox();
     final TextBox durationSecond 	= new TextBox();
     
-    public Configuration(final Simulation simulation) {
-    	this.simulation = simulation;
+    public Configuration(final Simulation sim) {
+    	simulation = sim;
     	
     	// TODO Check for a simulation is already running or not...
     	
