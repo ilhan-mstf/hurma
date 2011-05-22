@@ -13,14 +13,16 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class NodeType implements EntryPoint {
 
+	private Simulation simulation;
 	private int nodeTypeId;
 	private String nodeTypeName;
 	private String mib;
 	
-	NodeType(String[] values) {
-		this.nodeTypeId = Integer.parseInt(values[0]);
-		this.nodeTypeName = values[1];
-		this.mib = values[2];
+	NodeType(String id, String name, String mib, Simulation simulation) {
+		this.nodeTypeId = Integer.parseInt(id);
+		this.nodeTypeName = name;
+		this.mib = mib;
+		this.simulation = simulation;
 	}
 
 	@Override
@@ -63,12 +65,17 @@ public class NodeType implements EntryPoint {
 		vPanel.add(decPanel);
 		RootPanel.get("node").add(vPanel);
 		
+		/********************
+		 * BUTTON Handlers  *
+		 ********************/
+		
         addButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
             	// Loading message
             	RootPanel.get("rpcLoad").setVisible(true);
             	// Create Node
-            	Node n = new Node(nodeTypeId, mib);
+            	Node n = new Node(nodeTypeId, nodeTypeName, mib);
+            	simulation.getNodeList().add(n);
             	n.onModuleLoad();
             }
         });
