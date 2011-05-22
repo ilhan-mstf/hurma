@@ -49,7 +49,7 @@ public class Configuration implements EntryPoint {
 			public void onSuccess(ArrayList<String> result) {
 			    /**
 			     * Result format:
-			     * numberOfNodeTypes, (id, name, mib) ...
+			     * numberOfNodeTypes, (id, name, mib, icon) ...
 			     */
 				int size = Integer.parseInt(result.get(0));
 				for(int i=0; i<size; i++) {
@@ -211,15 +211,15 @@ public class Configuration implements EntryPoint {
         });
     
     }
-
-	public static void refreshTheNodeList() {
-		greetingService.getNodeTypes(new AsyncCallback<ArrayList<String>>() {
+    
+    public static void refreshTheNodeList() {
+    	greetingService.getNodeTypes(new AsyncCallback<ArrayList<String>>() {
 			public void onFailure(Throwable caught) {}
 			@Override
 			public void onSuccess(ArrayList<String> result) {
 			    /**
 			     * Result format:
-			     * numberOfNodeTypes, (id, name, mib) ...
+			     * numberOfNodeTypes, (id, name, mib, icon) ...
 			     */
 				int size = Integer.parseInt(result.get(0));
 				int i = size - 1;
@@ -229,7 +229,6 @@ public class Configuration implements EntryPoint {
 				
 			}
 		});
-		
-	}
+    }
 
 }

@@ -360,11 +360,9 @@ public class Node implements EntryPoint {
 		return created;
 	}
 
-	
 	public void setNodeId(int nodeId) {
 		this.nodeId = nodeId;
 	}
-
 
 	public int getNodeId() {
 		return nodeId;
