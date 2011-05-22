@@ -14,7 +14,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.io.File;
 
 public class NodeTypeParser extends DefaultHandler{
-	private static List<NodeTypeObject> nodeTypes;
+	static List<NodeTypeObject> nodeTypes;
 	private String tempVal;
 	private static NodeTypeObject tempNode;
 	
@@ -58,6 +58,8 @@ public class NodeTypeParser extends DefaultHandler{
 			tempNode.setName(tempVal);
 		}else if (qName.equalsIgnoreCase("MIBName")) {
 			tempNode.setMIB(tempVal);
+		}else if (qName.equalsIgnoreCase("icon")) {
+			tempNode.setIcon(tempVal);
 		}
 	}
 

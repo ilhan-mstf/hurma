@@ -51,6 +51,7 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 			values.add(Integer.toString(nodeType.getId()));
 			values.add(nodeType.getName());
 			values.add(nodeType.getMIB());
+			values.add(nodeType.getIcon());
 		}
 		System.out.println("server: xml is parsed.");
 		return values;
