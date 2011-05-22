@@ -6,6 +6,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -225,22 +226,33 @@ public class Node implements EntryPoint {
 		
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-            	layout.setHTML(0, 0, "<b>" + getNodeTypeName() + " - " + getNodeId() + "</b>");
-            	setCreated(true);
-                dialogBox.hide();
-                alarmPanel.clear();
-                for(int i=0; i<getCheckBoxList().size(); i++) {
-                	if(getCheckBoxList().get(i).getValue()) {
-                		alarmPanel.add(new HTML(" -> " + getCheckBoxList().get(i).getHTML()));
-                	}
+            	if(getPropertyList().get(0).getValue().isEmpty() && getPropertyList().get(1).getValue().isEmpty()){
+                	Window.alert("Please enter number of devices and error probability!");
+					
+                } else if(getPropertyList().get(0).getValue().isEmpty()){
+                	Window.alert("Please enter number of devices!");
+					
+                } else if(getPropertyList().get(1).getValue().isEmpty()){
+                	Window.alert("Please enter error probability!");
+					
+                } else {
+                	layout.setHTML(0, 0, "<b>" + getNodeTypeName() + " - " + getNodeId() + "</b>");
+                	setCreated(true);
+                    dialogBox.hide();
+                    alarmPanel.clear();
+                    for(int i=0; i<getCheckBoxList().size(); i++) {
+                    	if(getCheckBoxList().get(i).getValue()) {
+                    		alarmPanel.add(new HTML(" -> " + getCheckBoxList().get(i).getHTML()));
+                    	}
+                    }
+                    for(int i=0; i<getPropertyList().size(); i++){
+                    	alarmPanel.add(new HTML(getPropertyList().get(i).getTitle() + ": " + getPropertyList().get(i).getValue()));
+                    }
+                    vPanel.setStyleName("left");
+                    RootPanel.get("networkTopology").add(vPanel);
+                	numberOfDevice = Integer.parseInt(getPropertyList().get(0).getValue());
+                    prob = Float.parseFloat(getPropertyList().get(1).getValue());
                 }
-                for(int i=0; i<getPropertyList().size(); i++){
-                	alarmPanel.add(new HTML(getPropertyList().get(i).getTitle() + ": " + getPropertyList().get(i).getValue()));
-                }
-                vPanel.setStyleName("left");
-                RootPanel.get("networkTopology").add(vPanel);
-                numberOfDevice = Integer.parseInt(getPropertyList().get(0).getValue());
-                prob = Float.parseFloat(getPropertyList().get(1).getValue());
             }
         });
         
