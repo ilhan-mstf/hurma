@@ -1,17 +1,15 @@
 package com.cennetelmasi.hurma.client;
 
+import java.util.ArrayList;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Random;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -21,114 +19,50 @@ public class Configuration implements EntryPoint {
 	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
     Simulation simulation = new Simulation();
 	
-    final Button saveButton 		= new Button("  Save  ");
-    final Button clearButton 		= new Button(" Clear ");
-    final Button loadButton 		= new Button("  Load  ");
-    final Button logoutButton 		= new Button(" Logout ");
-    final Button runButton 			= new Button("  Run  ");
-    final Button pauseButton 		= new Button(" Pause ");
-    final Button resumeButton 		= new Button(" Resume ");
-    final Button stopButton 		= new Button(" Stop ");
-    final Button addNewDevice		= new Button(" New Device");
+    final Button saveButton 		= new Button("Save");
+    final Button clearButton 		= new Button("Clear");
+    final Button loadButton 		= new Button("Load");
+    final Button logoutButton 		= new Button("Logout");
+    final Button runButton 			= new Button("Run");
+    final Button addNewDevice		= new Button("New Device");
     final TextBox nameTextField 	= new TextBox();
     final ListBox simulationTypeLB 	= new ListBox(false);
     final TextBox durationHour 		= new TextBox();
     final TextBox durationMinute 	= new TextBox();
     final TextBox durationSecond 	= new TextBox();
-    final Label duration 			= new Label();
-    final String height 			= new String("15px");
     
-    public Configuration(Simulation simulation) {
-    	greetingService.nodeTypeNumber(new AsyncCallback<String>() {
-            public void onFailure(Throwable caught) {
-            	// TODO Show the RPC error message to the user
-            }
+    public Configuration(final Simulation simulation) {
+    	this.simulation = simulation;
+    	
+    	// TODO Check for a simulation is already running or not...
+    	
+    	// Make server call to generate NodeTypes
+    	greetingService.getNodeTypes(new AsyncCallback<ArrayList<String>>() {
 
 			@Override
-			public void onSuccess(String result) {
-				int length = Integer.parseInt(result);
+			public void onFailure(Throwable caught) {
+				// TODO Show the RPC error message to the user
 				
-				for(int i = 0; i < length - 1; i++) {
-					greetingService.getNodeTypeValues(i, new AsyncCallback<String[]>() {
-						public void onFailure(Throwable caught) {}
-						@Override
-						public void onSuccess(String[] values) {
-							new NodeType(values).onModuleLoad();
-						}
-					});
-				}
 			}
-    	});
-    	
-    	this.simulation.setSimulationName(simulation.getSimulationName());
-    	this.simulation.setSimulationId(simulation.getSimulationId());
-    	this.simulation.setSimulationDurationHour(simulation.getSimulationDurationHour());
-    	this.simulation.setSimulationDurationMinute(simulation.getSimulationDurationMinute());
-    	this.simulation.setSimulationDurationSecond(simulation.getSimulationDurationSecond());
-    	this.simulation.setNodeList(simulation.getNodeList());
+
+			@Override
+			public void onSuccess(ArrayList<String> result) {
+			    /**
+			     * Result format:
+			     * numberOfNodeTypes, (id, name, mib) ...
+			     */
+				int size = Integer.parseInt(result.get(0));
+				for(int i=0; i<size; i++) {
+					int index = i*3+1;
+					new NodeType(result.get(index), result.get(index+1), 
+								 result.get(index+2), simulation).onModuleLoad();
+				}
+				
+			}
+		});
     }
 	
-    public void onModuleLoad() {
-    	final StringBuffer durationText = new StringBuffer("");
-    	final StringBuffer runText = new StringBuffer("Simulation begins!..\n\n");
-    	runText.append("Devices in the network:\n");
-    	final TextArea text = new TextArea();
-    	text.setWidth("190px");
-    	text.setHeight("500px");
-    	final int initialLength = runText.length();
-    	
-    	final Timer timer = new Timer() {
-			@Override
-			public void run() {
-				int i = Random.nextInt();
-    			if(i >0)
-    				runText.append("alarm\n");
-    			text.setText(runText.toString());
-    		}
-    	};
-    	
-    	final Timer clock = new Timer() {
-    		int hour = 0, min = 0;
-			int sec = 0;
-			
-    		@Override
-			public void run() {
-    			sec++;
-    			if(sec >= 60){
-    				sec = 0;
-    				min++;
-    				if(min >= 60){
-    					min = 0;
-    					hour++;
-    				}
-    			}
-    			
-    			durationText.delete(0, durationText.length());
-    			if(hour < 10)	durationText.append("0");
-    			durationText.append(hour + ":");
-    			if(min < 10)	durationText.append("0");
-    			durationText.append(min + ":");
-    			if(sec < 10)	durationText.append("0");
-    			durationText.append(sec);
-    			duration.setText(durationText.toString());
-    
-    			if(stringToInteger(durationHour.getText()) <= hour 
-    			&& stringToInteger(durationMinute.getText()) <= min 
-    			&& stringToInteger(durationSecond.getText()) <= sec 
-    			) {
-    				this.cancel();
-    				timer.cancel();
-    				runText.append("\nTerminated\n");
-        			text.setText(runText.toString());
-        			pauseButton.setEnabled(false);
-                    stopButton.setEnabled(false);
-                    runButton.setEnabled(true);
-                    return;
-        			//RootPanel.get("node").add(text);
-    			}
-    		}
-    	};
-    	
+    public void onModuleLoad() {    	
         durationHour.setWidth("18px");
         durationMinute.setWidth("18px");
         durationSecond.setWidth("18px");
@@ -146,94 +80,48 @@ public class Configuration implements EntryPoint {
     	RootPanel.get("loadButton").add(loadButton);
     	RootPanel.get("logoutButton").add(logoutButton);
     	RootPanel.get("runButton").add(runButton);
-    	RootPanel.get("pauseButton").add(pauseButton);
-    	RootPanel.get("stopButton").add(stopButton);
     	RootPanel.get("addNewDevice").add(addNewDevice);
     	RootPanel.get("nameTextField").add(nameTextField);
     	RootPanel.get("simulationTypeLB").add(simulationTypeLB);
     	RootPanel.get("durationHour").add(durationHour);
     	RootPanel.get("durationMinute").add(durationMinute);
     	RootPanel.get("durationSecond").add(durationSecond);
-    	RootPanel.get("duration").add(duration);
     	
-    	pauseButton.setEnabled(false);
-        stopButton.setEnabled(false);
-    	
-        addNewDevice.addClickHandler(new ClickHandler() {
+		/********************
+		 * BUTTON Handlers  *
+		 ********************/
+		 
+    	addNewDevice.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				NewDevice dv = new NewDevice();
 				dv.onModuleLoad();
 			}
 		});
-        
+    	
     	runButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-            	int size = RootPanel.get("networkTopology").getWidgetCount();
-            	runText.delete(initialLength, runText.length());
-            	for(int i=0; i<size; i++) {
-            		runText.append(RootPanel.get("networkTopology").getWidget(i).getTitle() + "\n");
-            	}
-            	runText.append("\n");
-            	RootPanel.get("node").clear();
-            	RootPanel.get("node").add(text);
-            	//RootPanel.get("devices").setVisible(false);
-            	clock.run();
-            	timer.scheduleRepeating(2000);
-            	clock.scheduleRepeating(1000);
             	
-            	pauseButton.setEnabled(true);
-                stopButton.setEnabled(true);
-                runButton.setEnabled(false);
-            }
-    	});
-    	
-    	pauseButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-            	RootPanel.get("pauseButton").remove(pauseButton);
-            	RootPanel.get("pauseButton").add(resumeButton);
-            	timer.cancel();
-            	clock.cancel();
-            	runText.append("Paused\n");
-            	text.setText(runText.toString());
-            	RootPanel.get("node").add(text);
-            	stopButton.setEnabled(false);
+            	// Set simulation values
+            	simulation.setSimulationDurationHour(durationHour.getValue());
+            	simulation.setSimulationDurationMinute(durationMinute.getValue());
+            	simulation.setSimulationDurationSecond(durationSecond.getValue());
+            	simulation.setSimulationType(simulationTypeLB.getValue(simulationTypeLB.getSelectedIndex()));
             	
+            	// TODO Create pop-up
+            	SimulationConsole console = new SimulationConsole(simulation);
+            	console.onModuleLoad();
+                
             }
     	});
-    	
-    	resumeButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-            	RootPanel.get("pauseButton").add(pauseButton);
-            	RootPanel.get("pauseButton").remove(resumeButton);
-            	timer.scheduleRepeating(2000);
-            	clock.scheduleRepeating(1000);
-            	runText.append("Resumed\n");
-            	text.setText(runText.toString());
-            	RootPanel.get("node").add(text);
-            	stopButton.setEnabled(true);
-            }
-    	});
-    	
-    	stopButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-            	timer.cancel();
-            	clock.cancel();
-            	runText.append("Stop\n");
-            	text.setText(runText.toString());
-    			RootPanel.get("node").add(text);
-            	pauseButton.setEnabled(false);
-                stopButton.setEnabled(false);
-                runButton.setEnabled(true);
-            }
-    	});
-    	
+    	    	
     	saveButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
             	
             	System.out.println(RootPanel.get("networkTopology").getWidget(0).getTitle());
             	
-            	/* Steps to handle;
+            	/** 
+            	 * Steps to handle;
             	 * 1. Check if there is a file which has name nameTextField.getText(); (e.g. simulation_01)
             	 * 2. If there exists a file with name nameTextField.getText();
             	 * 	  whether save it as nameTextField.getText() + "_2" (e.g. simulation_01_02)
@@ -252,14 +140,15 @@ public class Configuration implements EntryPoint {
     	loadButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
             	final DialogBox dialogBox = new DialogBox();
+            	dialogBox.setAnimationEnabled(true);
+            	dialogBox.setGlassEnabled(true);
             	final VerticalPanel dialogVPanel = new VerticalPanel();
                 final Button closeButton = new Button("OK");
                 final ListBox fileListBox = new ListBox(false);
                 fileListBox.setVisibleItemCount(5);
                 
-                setButtons(false);
-                
-                /*following items are temporary
+                /**
+                 * Following items are temporary
                  * that is, in real system, we will get file names 
                  * from a  specific directory
                  */
@@ -287,9 +176,8 @@ public class Configuration implements EntryPoint {
                 
                 closeButton.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                    	//add a function to handle the events after loading the file
+                    	// Add a function to handle the events after loading the file
                     	dialogBox.removeFromParent();
-                    	setButtons(true);
                     }
                 });    
             }
@@ -312,37 +200,16 @@ public class Configuration implements EntryPoint {
             	RootPanel.get("loadButton").remove(loadButton);
             	RootPanel.get("logoutButton").remove(logoutButton);
             	RootPanel.get("runButton").remove(runButton);
-            	RootPanel.get("pauseButton").remove(pauseButton);
-            	RootPanel.get("stopButton").remove(stopButton);
             	RootPanel.get("nameTextField").remove(nameTextField);
             	RootPanel.get("simulationTypeLB").remove(simulationTypeLB);
             	RootPanel.get("durationHour").remove(durationHour);
             	RootPanel.get("durationMinute").remove(durationMinute);
             	RootPanel.get("durationSecond").remove(durationSecond);
             	RootPanel.get("node").clear();
-            	timer.cancel();
         		RootPanel.get("loginPage").setVisible(true);
             }
         });
     
-    }
-    
-    public int stringToInteger(String s) {
-		int i, j, num = 0;
-		for(i=s.length()-1, j=1; i>-1; i--, j*=10) {
-			num += (s.charAt(i) - 48)*j;
-		}
-		return num;
-	}
-    
-    public void setButtons(boolean bool){
-    	saveButton.setEnabled(bool);
-        clearButton.setEnabled(bool);
-        loadButton.setEnabled(bool);
-        logoutButton.setEnabled(bool);
-        runButton.setEnabled(bool);
-        pauseButton.setEnabled(bool);
-        stopButton.setEnabled(bool);
     }
 
 }

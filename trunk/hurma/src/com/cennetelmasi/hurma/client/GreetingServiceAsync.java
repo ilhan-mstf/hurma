@@ -9,11 +9,16 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public interface GreetingServiceAsync {
     void greetServer(String input, String pass, AsyncCallback<String> callback);
-    //void nodeTypeName(int index, AsyncCallback<String> asyncCallback);
-    //void nodeTypeID(int index, AsyncCallback<String> asyncCallback);
-    //void nodeTypeMIB(int index, AsyncCallback<String> asyncCallback);
-    void nodeTypeNumber(AsyncCallback<String> asyncCallback);
-    void getNodeTypeValues(int index, AsyncCallback<String[]> callback);
-	void getAlarmListName(String mib, AsyncCallback<ArrayList<String>> callback);
-	void getObjectList(String mib, AsyncCallback<ArrayList<String>> callback);
+    void getNodeTypes(AsyncCallback<ArrayList<String>> callback);
+    void getNodeObjValues(String mib, AsyncCallback<ArrayList<String>> callback);
+    void setNodeObjValues(ArrayList<String> values,
+			ArrayList<String> selectedAlarms, ArrayList<String> requiredFields,
+			AsyncCallback<Void> callback);
+	void deleteNodeObj(String id, AsyncCallback<Void> callback);
+	void startSimulation(int time, AsyncCallback<Void> callback);
+	void getOutputs(AsyncCallback<String> callback);
+	void pause(AsyncCallback<String> callback);
+	void resume(AsyncCallback<Void> callback);
+	void stop(AsyncCallback<String> callback);
+    
 }

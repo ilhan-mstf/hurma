@@ -9,7 +9,7 @@ public class Simulation {
 	private String simulationDurationMinute;
 	private String simulationDurationSecond;
 	private String simulationType;
-	private ArrayList<Node> nodeList;
+	private ArrayList<Node> nodeList = new ArrayList<Node>();
 	
 	public Simulation() {
 		simulationName ="";
@@ -18,7 +18,6 @@ public class Simulation {
 		simulationDurationMinute = "00";
 		simulationDurationSecond = "00";
 		simulationType = "Reduced";
-		nodeList = null;
 	}
 
 	public String getSimulationName() {
