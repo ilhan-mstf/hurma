@@ -55,7 +55,7 @@ public class Configuration implements EntryPoint {
 				for(int i=0; i<size; i++) {
 					int index = i*3+1;
 					new NodeType(result.get(index), result.get(index+1), 
-								 result.get(index+2), simulation).onModuleLoad();
+								 result.get(index+2), result.get(index+3), simulation).onModuleLoad();
 				}
 				
 			}
