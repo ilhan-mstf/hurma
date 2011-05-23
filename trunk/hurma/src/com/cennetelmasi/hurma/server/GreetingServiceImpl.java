@@ -127,7 +127,8 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 				// Set MIBObject values
 				int size = requiredFields.size();
 				for(int i=0; i<size; i++) {
-					MIBObject obj = n.getMibObjectByOid(requiredFields.get(i++));
+					MIBObject obj = n.getMibObjectByOid(requiredFields.get(i));
+					i++;
 					obj.setValue(requiredFields.get(i));
 				}
 				System.out.println("server: SNMP Agent is created, node id: " + n.getId());
@@ -191,6 +192,42 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		if (session.getAttribute("id") == null) {
     		session.setAttribute("id", "user");
     	}
+	}
+	
+	/**
+	 * Argument format:
+	 * simulation name
+	 * simulation type
+	 * simulation time (hour:minute:second)
+	 * 
+	 * to create xml use nodes (list of NodeObj) in se (simulationEngine)
+	 */
+	@Override
+	public void saveSimulation(ArrayList<String> values) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/**
+	 * Return format:
+	 * name of saved simulation names
+	 */
+
+	@Override
+	public ArrayList<String> getSavedSimulationName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * Return format:
+	 * bunu beraber konuşup karar verelim...
+	 * çünkü göndermesi geren çok şey var..
+	 */
+	@Override
+	public ArrayList<String> loadSimulation(String simulationName) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
