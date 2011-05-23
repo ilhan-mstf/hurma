@@ -118,6 +118,12 @@ public class Configuration implements EntryPoint {
     	saveButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
             	
+            	// Send node values to the server...
+            	
+            	
+            	// Send simulation values
+            	ArrayList<String> values = new ArrayList<String>();
+            	
             	System.out.println(RootPanel.get("networkTopology").getWidget(0).getTitle());
             	
             	/** 

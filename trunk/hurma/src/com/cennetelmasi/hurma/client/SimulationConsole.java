@@ -1,6 +1,5 @@
 package com.cennetelmasi.hurma.client;
 
-import java.util.ArrayList;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -9,14 +8,12 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class SimulationConsole implements EntryPoint {
@@ -145,53 +142,8 @@ public class SimulationConsole implements EntryPoint {
 		 *********************/
     	
         // Send simulation configuration to the server
-        for(int i=0; i<simulation.getNodeList().size(); i++) {
-        	final Node n = simulation.getNodeList().get(i);
-        	if(n.isCreated()) {
-        		// Values
-        		ArrayList<String> values = new ArrayList<String>();
-        		values.add(Integer.toString(n.getNodeId()));
-        		values.add(Integer.toString(n.getNumberOfDevice()));
-        		values.add(Float.toString(n.getProb()));
-        		values.add(n.getNodeTypeName());
-        		System.out.println("nodeid: "  + n.getId());
-        		// Alarms
-        		ArrayList<String> selectedAlarms = new ArrayList<String>();
-        		for(int j=0; j<n.getCheckBoxList().size(); j++) {
-        			CheckBox cb = n.getCheckBoxList().get(j);
-        			if(cb.getValue()) {
-        				selectedAlarms.add(cb.getElement().getId());
-        			}
-        		}
-        		// Required fields
-        		ArrayList<String> requiredFields = new ArrayList<String>();
-        		for(int j=0; j<n.getPropertyList().size(); j++) {
-        			TextBox tb = n.getPropertyList().get(j);
-        			selectedAlarms.add(tb.getElement().getId());
-        			selectedAlarms.add(tb.getValue());
-        		}
-        		// Make server call
-        		greetingService.setNodeObjValues(values, selectedAlarms, requiredFields,
-        				new AsyncCallback<Void>() {
-
-							@Override
-							public void onFailure(Throwable caught) {
-								runText.append("> ERROR: SNMP Agent is not created for " + n.getNodeTypeName());
-								console.setText(runText.toString());
-							}
-
-							@Override
-							public void onSuccess(Void result) {
-								runText.append("> SNMP Agent is created for " + n.getNodeTypeName() + "\n");
-								console.setText(runText.toString());
-							}
-						});
-        	}
-        	else {
-        		simulation.getNodeList().remove(i);
-        		i--;
-        	}
-        }
+        simulation.createNodeValues(true, runText, console);
+    	
         // Start simulation
         int time = Integer.parseInt(simulation.getSimulationDurationHour())*60 +
         		   Integer.parseInt(simulation.getSimulationDurationMinute())*60 +

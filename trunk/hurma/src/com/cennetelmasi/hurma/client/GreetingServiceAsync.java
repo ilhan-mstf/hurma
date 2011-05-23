@@ -23,5 +23,8 @@ public interface GreetingServiceAsync {
 	void destroySession(AsyncCallback<Void> callback);
 	void sessionControl(AsyncCallback<Boolean> callback);
 	void createSession(AsyncCallback<Void> callback);
-    
+	void saveSimulation(ArrayList<String> values, AsyncCallback<Void> callback);
+	void getSavedSimulationName(AsyncCallback<ArrayList<String>> callback);
+	void loadSimulation(String simulationName,
+			AsyncCallback<ArrayList<String>> callback);
 }
