@@ -2,7 +2,15 @@ package com.cennetelmasi.hurma.client;
 
 import java.util.ArrayList;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
+
 public class Simulation {
+	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
+	
 	private String simulationName;
 	private String simulationId;
 	private String simulationDurationHour;
@@ -11,6 +19,10 @@ public class Simulation {
 	private String simulationType;
 	private ArrayList<Node> nodeList = new ArrayList<Node>();
 	
+	private ArrayList<String> values;
+	private ArrayList<String> selectedAlarms;
+	private ArrayList<String> requiredFields;
+	
 	public Simulation() {
 		simulationName ="";
 		simulationId ="";
@@ -18,6 +30,79 @@ public class Simulation {
 		simulationDurationMinute = "00";
 		simulationDurationSecond = "00";
 		simulationType = "Reduced";
+	}
+	
+	public void createNodeValues(boolean isSimulation, StringBuffer runText, TextArea console) {
+		// Send simulation configuration to the server
+        for(int i=0; i<getNodeList().size(); i++) {
+        	final Node n = getNodeList().get(i);
+        	if(n.isCreated()) {
+        		// Values
+        		values = new ArrayList<String>();
+        		values.add(Integer.toString(n.getNodeId()));
+        		values.add(Integer.toString(n.getNumberOfDevice()));
+        		values.add(Float.toString(n.getProb()));
+        		values.add(n.getNodeTypeName());
+        		// Alarms
+        		selectedAlarms = new ArrayList<String>();
+        		for(int j=0; j<n.getCheckBoxList().size(); j++) {
+        			CheckBox cb = n.getCheckBoxList().get(j);
+        			if(cb.getValue()) {
+        				selectedAlarms.add(cb.getElement().getId());
+        			}
+        		}
+        		// Required fields
+        		requiredFields = new ArrayList<String>();
+        		for(int j=0; j<n.getPropertyList().size(); j++) {
+        			TextBox tb = n.getPropertyList().get(j);
+        			requiredFields.add(tb.getElement().getId());
+        			requiredFields.add(tb.getValue());
+        		}
+        		// Make server call
+        		// if it is called from simulation
+        		sendNodeValuesForSimulation(runText, console);
+        		// or from save operation
+        		sendNodeValuesForSave();
+        	}
+        	else {
+        		getNodeList().remove(i);
+        		i--;
+        	}
+        }
+	}
+	
+	public void sendNodeValuesForSimulation(final StringBuffer runText, final TextArea console) {
+		greetingService.setNodeObjValues(values, selectedAlarms, requiredFields,
+				new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						runText.append("> ERROR: SNMP Agent is not created for " + values.get(3));
+						console.setText(runText.toString());
+					}
+
+					@Override
+					public void onSuccess(Void result) {
+						runText.append("> SNMP Agent is created for " + values.get(3) + "\n");
+						console.setText(runText.toString());
+					}
+				});
+	}
+	
+	public void sendNodeValuesForSave() {
+		greetingService.setNodeObjValues(values, selectedAlarms, requiredFields,
+				new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+
+					}
+
+					@Override
+					public void onSuccess(Void result) {
+
+					}
+				});
 	}
 
 	public String getSimulationName() {
@@ -75,4 +160,5 @@ public class Simulation {
 	public void setNodeList(ArrayList<Node> nodeList) {
 		this.nodeList = nodeList;
 	}
+
 }

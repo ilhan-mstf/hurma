@@ -25,6 +25,9 @@ public interface GreetingService extends RemoteService {
 		boolean sessionControl();
 		void createSession();
 		void destroySession();
+		void saveSimulation(ArrayList<String> values);
+		ArrayList<String> getSavedSimulationName();
+		ArrayList<String> loadSimulation(String simulationName);
 		
 //        String[] getNodeTypeValues(int index);
 //        String sendSimulationConfiguration(String[] values, String[] alarms, String[] fields);
