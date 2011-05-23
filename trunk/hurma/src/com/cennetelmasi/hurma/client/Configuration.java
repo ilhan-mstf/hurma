@@ -117,6 +117,8 @@ public class Configuration implements EntryPoint {
     	    	
     	saveButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
+            	// save node values
+            	simulation.createNodeValues(false, null, null);
             	ArrayList<String> values = new ArrayList<String>();
             	values.add(nameTextField.getText());
             	values.add(Integer.toString(simulationTypeLB.getSelectedIndex()));

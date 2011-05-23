@@ -53,16 +53,17 @@ public class Simulation {
         		}
         		// Required fields
         		requiredFields = new ArrayList<String>();
-        		for(int j=0; j<n.getPropertyList().size(); j++) {
+        		for(int j=4; j<n.getPropertyList().size(); j++) {
         			TextBox tb = n.getPropertyList().get(j);
         			requiredFields.add(tb.getElement().getId());
         			requiredFields.add(tb.getValue());
         		}
         		// Make server call
         		// if it is called from simulation
-        		sendNodeValuesForSimulation(runText, console);
+        		if(isSimulation)
+        			sendNodeValuesForSimulation(runText, console);
         		// or from save operation
-        		sendNodeValuesForSave();
+        		else sendNodeValuesForSave();
         	}
         	else {
         		getNodeList().remove(i);
@@ -72,18 +73,20 @@ public class Simulation {
 	}
 	
 	public void sendNodeValuesForSimulation(final StringBuffer runText, final TextArea console) {
+		final String str = values.get(3);
+		System.out.println(str);
 		greetingService.setNodeObjValues(values, selectedAlarms, requiredFields,
 				new AsyncCallback<Void>() {
 
 					@Override
 					public void onFailure(Throwable caught) {
-						runText.append("> ERROR: SNMP Agent is not created for " + values.get(3));
+						runText.append("> ERROR: SNMP Agent is not created for " + str + "\n");
 						console.setText(runText.toString());
 					}
 
 					@Override
 					public void onSuccess(Void result) {
-						runText.append("> SNMP Agent is created for " + values.get(3) + "\n");
+						runText.append("> SNMP Agent is created for " + str + "\n");
 						console.setText(runText.toString());
 					}
 				});
