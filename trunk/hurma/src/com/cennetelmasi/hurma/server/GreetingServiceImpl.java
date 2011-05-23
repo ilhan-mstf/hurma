@@ -98,6 +98,7 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
     		}
     	}
     	se.getNodes().add(node);
+    	node.setId(id);
     	System.out.println("server: node created, node id: " + id);
     	id++;
     	return values;
@@ -113,6 +114,7 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 			ArrayList<String> selectedAlarms, ArrayList<String> requiredFields) {
 		for(NodeObj n : se.getNodes()) {
 			if(n.getId() == Integer.parseInt(values.get(0))) {
+				System.out.println(n.getId());
 				// Set values
 				n.setNumberOfDevices(Integer.parseInt(values.get(1)));
 				n.setProbability(Float.parseFloat(values.get(2)));
@@ -127,7 +129,9 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 				// Set MIBObject values
 				int size = requiredFields.size();
 				for(int i=0; i<size; i++) {
+					System.out.println(requiredFields.get(i));
 					MIBObject obj = n.getMibObjectByOid(requiredFields.get(i));
+					if(obj==null) System.out.println("obje null");
 					i++;
 					obj.setValue(requiredFields.get(i));
 				}
