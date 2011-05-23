@@ -87,7 +87,7 @@ public class MyFormHandler extends HttpServlet {
 		NodeTypeParser spe = new NodeTypeParser();
 		spe.parseDocument(file);
 		int i = NodeTypeParser.nodeTypes.size();
-		int lastId = 1;
+		int lastId = 0;
 		for(int j = 0; j<i; j++){
 			if(lastId < NodeTypeParser.nodeTypes.get(j).getId())
 				lastId = NodeTypeParser.nodeTypes.get(j).getId();

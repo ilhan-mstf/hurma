@@ -152,6 +152,21 @@ public class Configuration implements EntryPoint {
     	
     	loadButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
+            	greetingService.loadSimulation("", new AsyncCallback<ArrayList<String>>() {
+					
+					@Override
+					public void onSuccess(ArrayList<String> result) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+            	
             	final DialogBox dialogBox = new DialogBox();
             	dialogBox.setAnimationEnabled(true);
             	dialogBox.setGlassEnabled(true);
@@ -192,7 +207,8 @@ public class Configuration implements EntryPoint {
                     	// Add a function to handle the events after loading the file
                     	dialogBox.removeFromParent();
                     }
-                });    
+                });   
+                
             }
 		});
         

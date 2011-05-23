@@ -284,7 +284,9 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 			Element numberOfDevices = doc.createElement("numberOfDevices");
 			Element alarms = doc.createElement("alarms");
 			Element fields = doc.createElement("fields");
+			Element mib = doc.createElement("mib");
 			
+			mib.setTextContent(se.getNodes().get(i).getMIB());
 			nodeId.setTextContent(Integer.toString(se.getNodes().get(i).getId()));
 			nodeName.setTextContent(se.getNodes().get(i).getNodeName());
 			nodeType.setTextContent(se.getNodes().get(i).getNodeTypeName());
@@ -292,6 +294,7 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 			numberOfDevices.setTextContent(Integer.toString(number));
 			node.appendChild(nodeId);
 			node.appendChild(nodeName);
+			node.appendChild(mib);
 			node.appendChild(nodeType);
 			node.appendChild(trapRate);
 			node.appendChild(numberOfDevices);
@@ -402,6 +405,11 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 	@Override
 	public ArrayList<String> loadSimulation(String simulationName) {
 		// TODO Auto-generated method stub
+		File file = new File(simulationName);
+		TopologyParser ntp = new TopologyParser();
+		ntp.parseDocument(file);
+		TopologyObject topology = TopologyParser.nodeTypes.get(0);
+				
 		return null;
 	}
 
