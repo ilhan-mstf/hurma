@@ -14,6 +14,7 @@ public class Alarm {
 		description = null;
 		name = null;
 		requiredObjects = new ArrayList<Object>();
+		selected = false;
 	}
 	
 	public boolean isSelected(){
