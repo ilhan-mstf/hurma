@@ -409,7 +409,6 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		TopologyParser ntp = new TopologyParser();
 		ntp.parseDocument(file);
 		TopologyObject topology = TopologyParser.nodeTypes.get(0);
-				
 		return null;
 	}
 
