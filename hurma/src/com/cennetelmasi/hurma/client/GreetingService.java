@@ -1,9 +1,6 @@
 package com.cennetelmasi.hurma.client;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-
-import javax.xml.transform.TransformerException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
