@@ -1,11 +1,31 @@
 package com.cennetelmasi.hurma.server;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
 
 import net.percederberg.mibble.MibLoaderException;
 
@@ -208,10 +228,161 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 	 */
 	@Override
 	public void saveSimulation(ArrayList<String> values) {
-		// TODO Auto-generated method stub
-		
+		String simName = values.get(0);
+		String simType = values.get(1);
+		String simHour = values.get(2);
+		String simMin  = values.get(3);
+		String simSec  = values.get(4);
+		File file = new File(simName+".xml");
+		FileWriter writer = null;
+		try {
+			writer = new FileWriter(file);
+			writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><networkTopologies></networkTopologies>");
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+				
+		DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder;
+        Document doc = null;
+        try {
+			docBuilder = dbfac.newDocumentBuilder();
+			doc = docBuilder.parse(file);
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        
+        Element	root = doc.getDocumentElement();
+          
+        
+        Element duration = doc.createElement("duration");
+        Element simulationType  = doc.createElement("simulationType");
+        
+        Text durationText = doc.createTextNode(simHour+":"+simMin+":"+simSec);
+        Text simulationTypeText	 = doc.createTextNode(simType);
+        
+        duration.appendChild(durationText);
+        simulationType.appendChild(simulationTypeText);
+        
+        root.appendChild(duration);
+        root.appendChild(simulationType);
+        
+        Element topology = doc.createElement("networkTopology");
+        for(int i = 0; i < se.getNodes().size(); i++){
+			int number 	= se.getNodes().get(i).getNumberOfDevices();
+			float error	= se.getNodes().get(i).getProbability();
+			Element node = doc.createElement("node");
+			Element nodeId = doc.createElement("id");
+			Element nodeName = doc.createElement("name");
+			Element nodeType = doc.createElement("nodeType");
+			Element trapRate = doc.createElement("trapRate");
+			Element numberOfDevices = doc.createElement("numberOfDevices");
+			Element alarms = doc.createElement("alarms");
+			Element fields = doc.createElement("fields");
+			
+			nodeId.setTextContent(Integer.toString(se.getNodes().get(i).getId()));
+			nodeName.setTextContent(se.getNodes().get(i).getNodeName());
+			nodeType.setTextContent(se.getNodes().get(i).getNodeTypeName());
+			trapRate.setTextContent(Float.toString(error));
+			numberOfDevices.setTextContent(Integer.toString(number));
+			node.appendChild(nodeId);
+			node.appendChild(nodeName);
+			node.appendChild(nodeType);
+			node.appendChild(trapRate);
+			node.appendChild(numberOfDevices);
+			node.appendChild(alarms);
+			node.appendChild(fields);
+			ArrayList<String> reqObjOids = new ArrayList<String>();
+			for(int j = 0; j < se.getNodes().get(i).getAlarms().size(); j++){
+				Element alarm = doc.createElement("alarm");
+				alarm.setAttribute("oid", se.getNodes().get(i).getAlarms().get(j).getOid());
+				alarm.setTextContent(se.getNodes().get(i).getAlarms().get(j).getName());
+				alarms.appendChild(alarm);
+				for(int k = 0; k < se.getNodes().get(i).getAlarms().get(j).getRequiredObjects().size(); k++){
+					if(!reqObjOids.contains(se.getNodes().get(i).getAlarms().get(j).getRequiredObjects().get(k)))
+						reqObjOids.add(se.getNodes().get(i).getAlarms().get(j).getRequiredObjects().get(k).toString());
+				}
+			}
+			
+			for(int j = 0; j < se.getNodes().get(i).getMibObjects().size(); j++){
+				//if(reqObjOids.contains(se.getNodes().get(i).getMibObjects().get(j).getOid())){
+					//þu anda bütün deðerleri alýyor, yukarýdaki satýrdaki comment kaldýrýlýrsa
+					//bu sefer de sadece seçili alarmlara gereken objeleri alacak, bu halini seçtim pikaçu!..
+					Element field = doc.createElement("field");
+					field.setAttribute("oid", se.getNodes().get(i).getMibObjects().get(j).getOid());
+					field.setAttribute("name",se.getNodes().get(i).getMibObjects().get(j).getName());
+					field.setTextContent(se.getNodes().get(i).getMibObjects().get(j).getValue());
+					fields.appendChild(field);
+				//}
+			}
+			
+			topology.appendChild(node);
+        }
+        
+        root.appendChild(topology);
+        
+        TransformerFactory transfac = TransformerFactory.newInstance();
+		Transformer trans = null;
+		try {
+			trans = transfac.newTransformer();
+		} catch (TransformerConfigurationException e) {
+			e.printStackTrace();
+		}
+		trans.setOutputProperty(OutputKeys.INDENT, "yes");
+
+		StringWriter sw = new StringWriter();
+	    StreamResult result = new StreamResult(sw);
+	    DOMSource source = new DOMSource(doc);
+	    try {
+			trans.transform(source, result);
+		} catch (TransformerException e2) {
+			e2.printStackTrace();
+		}
+	    String xmlString = sw.toString();
+	 
+	    OutputStream f0 = null;
+	    byte buf[] = xmlString.getBytes();
+	    try {
+			f0 = new FileOutputStream(file);
+			for(int i=0;i<buf .length;i++) {
+				f0.write(buf[i]); 
+			}
+			f0.close();
+			buf = null;
+	    } catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
+			   e.printStackTrace();
+		   }
+	      
 	}
-	
+	/*	
+	 * <duration></duration>
+		<simulationType></simulationType>
+		<networkTopology>
+			<node>
+				<id></id>
+				<name></name>
+				<nodeTypeId></nodeTypeId>
+				<trapRate></trapRate>
+				<alarm>
+				<id></id>
+				<name></name>
+				<field></field>
+				<value></value>
+				</alarm>
+				...
+				<ip></ip>
+				<numberOfDevices></numberOfDevices>
+			</node>
+		</networkTopology>
+	 * 
+	 * */
 	/**
 	 * Return format:
 	 * name of saved simulation names
