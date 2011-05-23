@@ -117,13 +117,18 @@ public class Configuration implements EntryPoint {
     	    	
     	saveButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-            	
-            	// Send node values to the server...
-            	
-            	
-            	// Send simulation values
             	ArrayList<String> values = new ArrayList<String>();
-            	
+            	values.add(nameTextField.getText());
+            	values.add(Integer.toString(simulationTypeLB.getSelectedIndex()));
+            	values.add(durationHour.getText());
+            	values.add(durationMinute.getText());
+            	values.add(durationSecond.getText());
+            	greetingService.saveSimulation(values, new AsyncCallback<Void>() {
+					@Override
+					public void onSuccess(Void result) {}
+					@Override
+					public void onFailure(Throwable caught) {}
+				});
             	System.out.println(RootPanel.get("networkTopology").getWidget(0).getTitle());
             	
             	/** 
