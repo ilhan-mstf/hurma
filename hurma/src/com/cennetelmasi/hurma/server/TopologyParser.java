@@ -21,6 +21,7 @@ public class TopologyParser extends DefaultHandler{
 	private static TopologyObject tempNode;
 	private static NodeObj node;
 	private static boolean isField = false;
+	private static boolean isAlarm = false;
 	private static String oid = "";
 	public TopologyParser() {
 		nodeTypes = new ArrayList<TopologyObject>();
@@ -50,6 +51,9 @@ public class TopologyParser extends DefaultHandler{
 		} else if(qName.equalsIgnoreCase("field")) {
 			isField = true;
 			oid = attributes.getValue("oid");
+		} else if(qName.equalsIgnoreCase("alarm")) {
+			isAlarm = true;
+			oid = attributes.getValue("oid");
 		}
 	}
 	
@@ -63,6 +67,10 @@ public class TopologyParser extends DefaultHandler{
 			node.setMibObjectByOid(oid, tempVal);
 			oid = "";
 			isField = false;
+		} else if(isAlarm){
+			node.getAlarmByOid(oid).setSelectStatus(true);
+			oid = "";
+			isAlarm = false;
 		} else if(qName.equalsIgnoreCase("networkTopologies")) {
 			nodeTypes.add(tempNode);	
 		}else if (qName.equalsIgnoreCase("duration")) {

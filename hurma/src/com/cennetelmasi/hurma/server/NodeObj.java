@@ -40,6 +40,14 @@ public class NodeObj {
 		parseMIB();
 	}
 	
+	public Alarm getAlarmByOid(String oid){
+		for(int i = 0; i<alarms.size(); i++){
+			if(alarms.get(i).getOid().equals(oid))
+				return alarms.get(i);
+		}
+		return null;
+	}
+	
 	public void parseMIB() throws IOException, MibLoaderException {
 		MibLoader  	loader = new MibLoader();
 	    Mib     	mib = null;
