@@ -7,12 +7,21 @@ public class Alarm {
 	private String description;
 	private String name;
 	private ArrayList<Object> requiredObjects;
+	private boolean selected;
 
 	public Alarm() {
 		oid = null;
 		description = null;
 		name = null;
 		requiredObjects = new ArrayList<Object>();
+	}
+	
+	public boolean isSelected(){
+		return selected;
+	}
+	
+	public void setSelectStatus(boolean status){
+		selected = status;
 	}
 
 	public String getOid() {
