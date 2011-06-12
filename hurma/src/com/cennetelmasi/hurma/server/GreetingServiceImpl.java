@@ -161,7 +161,7 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		for(i=0; i<se.getNodes().size(); i++)
 			if(se.getNodes().get(i).getId()==Integer.parseInt(id))
 				break;
-		se.getNodes().remove(--i);
+		se.getNodes().remove(i);
 		System.out.println("server: node deleted, node id: " + i);
 	}
 	
@@ -233,13 +233,13 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 	@Override
 	public ArrayList<String> getSavedSimulationName() {
 		ArrayList<String> names = new ArrayList<String>();
-		names.add("Simulation_27.11.2010.xml");
-		names.add("Simulation_03.12.2010.xml");
-		names.add("Simulation_12.12.2010.xml");
-		names.add("Simulation_13.12.2010.xml");
-		names.add("Simulation_01.01.2011.xml");
-		names.add("Simulation_04.01.2011.xml");
-		names.add("Simulation_21.01.2011.xml");
+		
+		File f = new File("saved/");
+		String[] children = f.list();
+			
+		for(String child: children)
+			names.add(child);
+		
 		return names;
 	}
 
@@ -251,7 +251,8 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 	@Override
 	public ArrayList<String> loadSimulation(String simulationName) {
 		//File file = new File(simulationName);
-		File file = new File("saved/hede.xml");
+		System.out.println(simulationName);
+		File file = new File("saved/" + simulationName);
 		TopologyParser tp = new TopologyParser();
 		tp.parseDocument(file);
 		TopologyObject topology = TopologyParser.getTopology();		
@@ -273,5 +274,13 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		se.clear();
 	}
 
+	@Override
+	public String getSimulationState() {
+		return se.getSimulationState();
+	}
+
+	public int getPassedTime() {
+		return se.getProtocol().getPassedTime();
+	}
 }
 

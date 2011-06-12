@@ -41,6 +41,7 @@ public class SNMPagent extends Thread {
 			beeper = new Runnable() {
 				public void run() {
 					try {
+						protocol.setPassedTime(protocol.getPassedTime()+5);
 						getProtocol().wakeUp();
 						// wait util deciding to sending traps
 						sleep(100);
@@ -71,7 +72,7 @@ public class SNMPagent extends Thread {
 	
 	public void resumeScheduler() {
 		beeperHandle = scheduler
-				.scheduleAtFixedRate(beeper, 0, 10, TimeUnit.SECONDS);
+				.scheduleAtFixedRate(beeper, 0, 5, TimeUnit.SECONDS);
 	}
 
 	public void setType(String type) {

@@ -22,11 +22,12 @@ public class Protocol {
 	TransportMapping transport;
 	CommunityTarget comtarget;
 	Snmp snmp;
-
+	
+	private int passedTime = 0;
+	
 	// initial values
 	private int cofactor;
 	
-
 	private String UdpAddress = "127.0.0.1/0";
 	private String community = "public";
 	private String ipAddress = "127.0.0.1";
@@ -40,7 +41,7 @@ public class Protocol {
 
 	public Protocol() {
 	}
-
+	
 	public float errorRateCalculation(float prob, int freq) {
 		int totalSeconds = 1;
 		switch (freq) {
@@ -158,8 +159,8 @@ public class Protocol {
 		pdu.add(new VariableBinding(SnmpConstants.sysUpTime, new OctetString(
 				new Date().toString())));
 		pdu.add(new VariableBinding(SnmpConstants.snmpTrapOID, new OID(trapOID)));
-		// pdu.add(new VariableBinding(SnmpConstants.snmpTrapAddress,
-		// new IpAddress(ipAddress)));
+//		pdu.add(new VariableBinding(SnmpConstants.snmpTrapAddress,
+//				new IpAddress(ipAddress)));
 
 		// add the required objects...
 		for (Object obj : alarm.getRequiredObjects()) {
@@ -195,4 +196,13 @@ public class Protocol {
 	public StringBuffer getLog() {
 		return log;
 	}
+
+	public void setPassedTime(int passedTime) {
+		this.passedTime = passedTime;
+	}
+
+	public int getPassedTime() {
+		return passedTime;
+	}
+
 }
