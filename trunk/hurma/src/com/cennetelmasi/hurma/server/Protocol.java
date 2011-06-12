@@ -38,6 +38,34 @@ public class Protocol {
 	public Protocol() {
 	}
 
+	public float errorRateCalculation(float prob, int freq) {
+		int totalSeconds = 1;
+		switch (freq) {
+		case 0:
+			totalSeconds = 1;//seconds
+			break;
+		case 1:
+			totalSeconds = 60;//minute
+			break;
+		case 2://hour
+			totalSeconds = 60*60;
+			break;
+		case 3://day
+			totalSeconds = 60*60*24;
+			break;
+		case 4://week
+			totalSeconds = 60*60*24*7;
+			break;
+		case 5://month
+			totalSeconds = 60*60*24*30;
+			break;
+		case 6://year
+			totalSeconds = 60*60*24*365;
+			break;
+		}
+		return prob/totalSeconds;
+	}
+
 	// NODE will execute this function during the simulation
 	public synchronized void run(NodeObj node) {
 		while (true) {
@@ -49,14 +77,21 @@ public class Protocol {
 						+ node.getId());
 				e.printStackTrace();
 			}
-			// decide to send trap or not
-			// TODO probability
-			//if (probCal(node.getProbability())) {
-				System.out.println("server: device " + node.getId() + "- trap");
-				// select alarm
-				// add to queue
-				alarmQueue.add(new Trap(node, 0));
-			//}
+			int iterator = 0;
+			for (Alarm alarm : node.getAlarms()) {
+				if(!alarm.isSelected())	continue;
+				float rate = node.getNumberOfDevices()*errorRateCalculation(alarm.getProb(),alarm.getFreq());
+				if(rate > 1) rate = 1;
+				
+				Random rand = new Random();
+				float val = rand.nextFloat();
+
+				if(rate>=val){
+					System.out.println("server: device " + node.getId() + "- trap " + alarm.getName());
+					alarmQueue.add(new Trap(node, iterator));
+				}
+				iterator++;
+			}
 		}
 	}
 
@@ -74,7 +109,7 @@ public class Protocol {
 	}
 
 	public boolean probCal(float probability) {
-		return true; // generator.nextBoolean();
+		return generator.nextBoolean();
 	}
 
 	public void initSNMP() throws IOException {
@@ -101,7 +136,7 @@ public class Protocol {
 
 	public void sendSnmpV2Trap(Trap trap) throws IOException {
 		NodeObj node = trap.getNode();
-		Alarm alarm = node.getAlarms().get(0);
+		Alarm alarm = node.getAlarms().get(trap.getAlarmId());
 
 		String trapOID = alarm.getOid().toString();
 		String description = alarm.getDescription();
@@ -112,8 +147,8 @@ public class Protocol {
 		pdu.add(new VariableBinding(SnmpConstants.sysUpTime, new OctetString(
 				new Date().toString())));
 		pdu.add(new VariableBinding(SnmpConstants.snmpTrapOID, new OID(trapOID)));
-//		pdu.add(new VariableBinding(SnmpConstants.snmpTrapAddress,
-//				new IpAddress(ipAddress)));
+		// pdu.add(new VariableBinding(SnmpConstants.snmpTrapAddress,
+		// new IpAddress(ipAddress)));
 
 		// add the required objects...
 		for (Object obj : alarm.getRequiredObjects()) {
@@ -131,11 +166,12 @@ public class Protocol {
 		// Send the PDU
 		snmp.send(pdu, comtarget);
 		count++;
-		
-		String str = node.getNodeName() + " - " + node.getId() + " : " + trap.getNode().getAlarms().get(0).getName() + "\n";
+
+		String str = node.getNodeName() + " - " + node.getId() + " : "
+				+ trap.getNode().getAlarms().get(trap.getAlarmId()).getName() + "\n";
 		log.append(str);
-		System.out.println("server: " + count + " -- device " + node.getId() +
-				 			" - Sending V2 Trap to " + ipAddress + " on Port " + port);
+		System.out.println("server: " + count + " " + alarm.getName() + " -- device " + node.getId()
+				+ " - Sending V2 Trap to " + ipAddress + " on Port " + port);
 		// ResponseEvent respEv = snmp.send(pdu, comtarget);
 		// PDU response = respEv.getResponse();
 		snmp.close();
