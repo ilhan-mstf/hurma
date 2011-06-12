@@ -176,7 +176,7 @@ public class Protocol {
 		NodeObj node = trap.getNode();
 		Alarm alarm = node.getAlarms().get(trap.getAlarmId());
 		int numberOfDevices = node.getNumberOfDevices();
-		String nodeIp=node.getIp();
+		
 		String trapOID = alarm.getOid().toString();
 		String description = alarm.getDescription();
 
@@ -207,10 +207,10 @@ public class Protocol {
 		count++;
 
 		Random rand = new Random();
-		
 		String str = node.getNodeName() + " - " + node.getId() + " : "
 				+ trap.getNode().getAlarms().get(trap.getAlarmId()).getName() + 
-				" for the device " + getIpAt(node.getIp(), rand.nextInt(numberOfDevices))+ "\n";
+				" for the device " + getIpAt(node.getIp(), rand.nextInt(numberOfDevices))+ 
+				" /"+ generateMacAddress() + "\n";
 		
 		
 		log.append(str);
