@@ -16,7 +16,7 @@ public class Simulation {
 	private String simulationDurationHour;
 	private String simulationDurationMinute;
 	private String simulationDurationSecond;
-	private String simulationType;
+	private int simulationType;
 	private ArrayList<Node> nodeList = new ArrayList<Node>();
 	
 	private ArrayList<String> values;
@@ -40,7 +40,7 @@ public class Simulation {
 		simulationDurationHour = "00";
 		simulationDurationMinute = "00";
 		simulationDurationSecond = "00";
-		simulationType = "Reduced";
+		simulationType = 0;
 	}
 	
 	public void createNodeValues(boolean isSimulation, StringBuffer runText, TextArea console) {
@@ -166,11 +166,11 @@ public class Simulation {
 		this.simulationDurationSecond = simulationDurationSecond;
 	}
 
-	public String getSimulationType() {
+	public int getSimulationType() {
 		return simulationType;
 	}
 
-	public void setSimulationType(String simulationType) {
+	public void setSimulationType(int simulationType) {
 		this.simulationType = simulationType;
 	}
 

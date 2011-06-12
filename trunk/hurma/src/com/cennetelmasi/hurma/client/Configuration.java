@@ -109,7 +109,7 @@ public class Configuration implements EntryPoint {
             	simulation.setSimulationDurationHour(durationHour.getValue());
             	simulation.setSimulationDurationMinute(durationMinute.getValue());
             	simulation.setSimulationDurationSecond(durationSecond.getValue());
-            	simulation.setSimulationType(simulationTypeLB.getValue(simulationTypeLB.getSelectedIndex()));
+            	simulation.setSimulationType(simulationTypeLB.getSelectedIndex());
             	
             	// TODO Create pop-up
             	SimulationConsole console = new SimulationConsole(simulation);
@@ -139,21 +139,6 @@ public class Configuration implements EntryPoint {
 					}
 				});
             	System.out.println(RootPanel.get("networkTopology").getWidget(0).getTitle());
-            	
-            	/** 
-            	 * Steps to handle;
-            	 * 1. Check if there is a file which has name nameTextField.getText(); (e.g. simulation_01)
-            	 * 2. If there exists a file with name nameTextField.getText();
-            	 * 	  whether save it as nameTextField.getText() + "_2" (e.g. simulation_01_02)
-            	 *    or ask for another name with a pop-up
-            	 * 3. Save the xml file
-            	 * 	  - Read data from fields
-            	 * 	  - Read data from devices
-            	 *    - construct xml structure
-            	 * 4. After saving check whether it succeeded or not
-            	 * 	  check if the nameTextField.getText.xml exists.
-            	 * 5. If so pop up "Success" else "Error" 
-            	 */
             }
     	});
     	
@@ -218,7 +203,7 @@ public class Configuration implements EntryPoint {
 								 * (nodeId), ...
 								 */
 								simulation.setSimulationName(result.get(0));
-								simulation.setSimulationType(result.get(1));
+								simulation.setSimulationType(Integer.parseInt(result.get(1)));
 								String[] duration = result.get(2).split(":");
 								simulation.setSimulationDurationHour(duration[0]);
 								simulation.setSimulationDurationMinute(duration[1]);
