@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -20,9 +21,10 @@ public class SimulationConsole implements EntryPoint {
 	private Simulation simulation;
 	
 	private int cofactor;
-	int h = 0, m = 0, s = 0;
+	int hour = 0, minute = 0, second = 0;
 	
-	final Button logoutButton 		= new Button("Logout");
+	final Button closeButton 		= new Button("Close");
+	final Button showButton			= new Button("Show Console");
     final Button pauseButton 		= new Button("Pause");
     final Button resumeButton 		= new Button("Resume");
     final Button stopButton 		= new Button("Stop");
@@ -43,10 +45,11 @@ public class SimulationConsole implements EntryPoint {
     	/*********************
 		 * Initialize pop-up *
 		 *********************/
+		
+		// Calculate simulation type time
 		cofactor = 1;
-		for(int mustafa = 0; mustafa < simulation.getSimulationType(); mustafa++){
+		for(int mustafa = 0; mustafa < simulation.getSimulationType(); mustafa++)
 			cofactor *= 2;
-		}
 		
 		HorizontalPanel controlPanel = new HorizontalPanel();
 		final HorizontalPanel buttons = new HorizontalPanel();
@@ -65,7 +68,9 @@ public class SimulationConsole implements EntryPoint {
     	
     	buttons.add(pauseButton);
     	buttons.add(stopButton);
-    	buttons.add(logoutButton);
+    	buttons.add(closeButton);
+    	
+    	RootPanel.get("showButton").add(showButton);
     	
     	String str = simulation.getSimulationDurationHour() + ":" +
     				 simulation.getSimulationDurationMinute() + ":" +
@@ -112,28 +117,28 @@ public class SimulationConsole implements EntryPoint {
     		
     		@Override
 			public void run() {
-    			s++;
-    			if(s >= 60){
-    				s = 0;
-    				m++;
-    				if(m >= 60){
-    					m = 0;
-    					h++;
+    			second++;
+    			if(second >= 60){
+    				second = 0;
+    				minute++;
+    				if(minute >= 60){
+    					minute = 0;
+    					hour++;
     				}
     			}
     			
     			durationText.delete(0, durationText.length());
-    			if(h < 10)	durationText.append("0");
-    			durationText.append(h + ":");
-    			if(m < 10)	durationText.append("0");
-    			durationText.append(m + ":");
-    			if(s < 10)	durationText.append("0");
-    			durationText.append(s);
+    			if(hour < 10)	durationText.append("0");
+    			durationText.append(hour + ":");
+    			if(minute < 10)	durationText.append("0");
+    			durationText.append(minute + ":");
+    			if(second < 10)	durationText.append("0");
+    			durationText.append(second);
     			passedTime.setText("Passed Time: " + durationText.toString());
     
-    			if(stringToInteger(simulation.getSimulationDurationHour()) <= h 
-    			&& stringToInteger(simulation.getSimulationDurationMinute()) <= m 
-    			&& stringToInteger(simulation.getSimulationDurationSecond()) <= s ) {
+    			if(Integer.parseInt(simulation.getSimulationDurationHour()) <= hour 
+    			&& Integer.parseInt(simulation.getSimulationDurationMinute()) <= minute 
+    			&& Integer.parseInt(simulation.getSimulationDurationSecond()) <= second ) {
     				this.cancel();
     				runText.append("> Simulation successfully ended.");
         			console.setText(runText.toString());
@@ -156,17 +161,26 @@ public class SimulationConsole implements EntryPoint {
 
 				@Override
 				public void onSuccess(Integer result) {
-					h = result / 3600;
-					m = (result-3600*h) / 60;
-					s = result-m*60;
+					hour = result / 3600;
+					minute = (result-3600*hour) / 60;
+					second = result-minute*60 + hour*3600;
+					
+			    	String str = simulation.getSimulationDurationHour() + ":" +
+						  		simulation.getSimulationDurationMinute() + ":" +
+						  		simulation.getSimulationDurationSecond();
+					simulationDuration.setText("Simulation duration: " + str);
+					passedTime.setText("Passed Time: " + durationText);
+					
+					for(int mustafa = 0; mustafa < simulation.getSimulationType(); mustafa++)
+						cofactor *= 2;
 
 			    	if(simulation.getSimulationState().equals("running")) {
-			    		runText.append("> Simulation is continue...\n");
+			    		runText.append("> Simulation is going to continue...\n");
 						console.setText(runText.toString());
-						timer.scheduleRepeating(1000);
-						serverTimer.scheduleRepeating(10000);
+						timer.scheduleRepeating(1000/cofactor);
+						serverTimer.scheduleRepeating(1000/cofactor);
 			    	} else if(simulation.getSimulationState().equals("paused")) {
-			    		runText.append("> Simulation is paused\n");
+			    		runText.append("> Simulation was paused.\n");
 			    		console.setText(runText.toString());
 			        	buttons.remove(pauseButton);
 			        	buttons.insert(resumeButton, 0);
@@ -205,14 +219,6 @@ public class SimulationConsole implements EntryPoint {
 				}
 			});
     	}
-    	
-    	System.out.println("AAAAAAAAAAAAAAAAAAAAAA"+simulation.getSimulationDurationMinute());
-    	
-    	str = simulation.getSimulationDurationHour() + ":" +
-			  simulation.getSimulationDurationMinute() + ":" +
-			  simulation.getSimulationDurationSecond();
-		simulationDuration.setText("Simulation duration: " + str);
-		passedTime.setText("Passed Time: " + durationText);
 
 		/********************
 		 * BUTTON Handlers  *
@@ -290,24 +296,22 @@ public class SimulationConsole implements EntryPoint {
             }
     	});
     	
-    	logoutButton.addClickHandler(new ClickHandler() {
+    	closeButton.addClickHandler(new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				timer.cancel();
-				serverTimer.cancel();
 				dialogBox.hide();
 			}
 		});
+    	
+    	showButton.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				dialogBox.center();
+			}
+		});
 	
-	}
-	
-    public int stringToInteger(String s) {
-		int i, j, num = 0;
-		for(i=s.length()-1, j=1; i>-1; i--, j*=10) {
-			num += (s.charAt(i) - 48)*j;
-		}
-		return num;
 	}
 
 }
