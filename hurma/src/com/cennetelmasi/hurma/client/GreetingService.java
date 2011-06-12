@@ -17,6 +17,8 @@ public interface GreetingService extends RemoteService {
 							   ArrayList<String> selectedAlarms,
 							   ArrayList<String> requiredFields);
 		ArrayList<String> getNodeTypes();
+		String getSimulationState();
+		int getPassedTime();
 		void deleteNodeObj(String id);
 		void startSimulation(int time, int cofactor);
 		String getOutputs();

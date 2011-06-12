@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -35,14 +36,31 @@ public class Configuration implements EntryPoint {
     public Configuration(final Simulation sim) {
     	simulation = sim;
     	
-    	// TODO Check for a simulation is already running or not...
+    	// Check for a simulation is already running or not...
+    	greetingService.getSimulationState(new AsyncCallback<String>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				RootPanel.get("rpcError").setVisible(true);
+			}
+
+			@Override
+			public void onSuccess(String result) {
+				simulation.setSimulationState(result);
+				if(!result.equals("ready")) {
+					load("lastSession.xml");
+					SimulationConsole console = new SimulationConsole(simulation);
+					console.onModuleLoad();
+				}
+			}
+		});
     	
     	// Make server call to generate NodeTypes
     	greetingService.getNodeTypes(new AsyncCallback<ArrayList<String>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				// TODO Show the RPC error message to the user
+				RootPanel.get("rpcError").setVisible(true);
 			}
 
 			@Override
@@ -110,6 +128,7 @@ public class Configuration implements EntryPoint {
             	simulation.setSimulationDurationMinute(durationMinute.getValue());
             	simulation.setSimulationDurationSecond(durationSecond.getValue());
             	simulation.setSimulationType(simulationTypeLB.getSelectedIndex());
+            	simulation.setSimulationState("ready");
             	
             	// TODO Create pop-up
             	SimulationConsole console = new SimulationConsole(simulation);
@@ -120,53 +139,43 @@ public class Configuration implements EntryPoint {
     	    	
     	saveButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-            	// save node values
-            	simulation.createNodeValues(false, null, null);
-            	ArrayList<String> values = new ArrayList<String>();
-            	values.add(nameTextField.getText());
-            	values.add(Integer.toString(simulationTypeLB.getSelectedIndex()));
-            	values.add(durationHour.getText());
-            	values.add(durationMinute.getText());
-            	values.add(durationSecond.getText());
-            	greetingService.saveSimulation(values, new AsyncCallback<Void>() {
-					@Override
-					public void onSuccess(Void result) {
-						Window.alert("Succesfully saved.");
-					}
-					@Override
-					public void onFailure(Throwable caught) {
-						Window.alert("Operation failed.");
-					}
-				});
-            	System.out.println(RootPanel.get("networkTopology").getWidget(0).getTitle());
+            	if(nameTextField.getText().isEmpty())
+            		Window.alert("Simulation name empty");
+            	else
+            		save(nameTextField.getText());
             }
     	});
     	
     	loadButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-            	RootPanel.get("rpcLoad").setVisible(true);
+            public void onClick(ClickEvent event) {            	
             	final DialogBox dialogBox = new DialogBox();
             	dialogBox.setAnimationEnabled(true);
             	dialogBox.setGlassEnabled(true);
+            	
             	final VerticalPanel dialogVPanel = new VerticalPanel();
-                final Button closeButton = new Button("OK");
+                // Add a button to upload the file
+                Button uploadButton = new Button("OK");
+                Button cancelButton = new Button("Cancel");
+                HorizontalPanel buttons = new HorizontalPanel();
+                buttons.add(uploadButton);
+                buttons.add(cancelButton);
+                buttons.setSpacing(6);
+                
                 final ListBox fileListBox = new ListBox(false);
                 fileListBox.setVisibleItemCount(5);
                 
                 greetingService.getSavedSimulationName(new AsyncCallback<ArrayList<String>>() {
 
 					@Override
-					public void onFailure(Throwable caught) {
-		            	RootPanel.get("rpcLoad").setVisible(false);
+					public void onFailure(Throwable arg0) {
+						RootPanel.get("rpcLoad").setVisible(false);
 		            	RootPanel.get("rpcError").setVisible(true);
 					}
 
 					@Override
-					public void onSuccess(ArrayList<String> result) {
-						for(int i=0; i<result.size(); i++)
-							fileListBox.addItem(result.get(i));
-						RootPanel.get("rpcLoad").setVisible(false);
-						dialogBox.center();
+					public void onSuccess(ArrayList<String> arg0) {
+						for(int i=0; i<arg0.size(); i++)
+							fileListBox.addItem(arg0.get(i));
 					}
 				});
                 
@@ -178,45 +187,27 @@ public class Configuration implements EntryPoint {
                 dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
                 dialogVPanel.add(fileListBox);
                 dialogVPanel.add(new HTML("<br/><br/>"));
-                dialogVPanel.add(closeButton);
+                dialogVPanel.add(buttons);
                 
                 dialogBox.setWidget(dialogVPanel);
+                dialogBox.center();
                 
-                closeButton.addClickHandler(new ClickHandler() {
+                uploadButton.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
-                    	// Add a function to handle the events after loading the file
                     	dialogBox.hide();
-                    	greetingService.loadSimulation("simulation.xml", new AsyncCallback<ArrayList<String>>() {
-
-							@Override
-							public void onFailure(Throwable caught) {
-								RootPanel.get("rpcLoad").setVisible(false);
-				            	RootPanel.get("rpcError").setVisible(true);
-							}
-
-							@Override
-							public void onSuccess(ArrayList<String> result) {
-								//for(String str : result) System.out.println(str);
-								/**
-								 * result format:
-								 * name, simulationType, duration, numberOfNode, 
-								 * (nodeId), ...
-								 */
-								simulation.setSimulationName(result.get(0));
-								simulation.setSimulationType(Integer.parseInt(result.get(1)));
-								String[] duration = result.get(2).split(":");
-								simulation.setSimulationDurationHour(duration[0]);
-								simulation.setSimulationDurationMinute(duration[1]);
-								simulation.setSimulationDurationSecond(duration[2]);
-								int size = Integer.parseInt(result.get(3));
-								for(int i=0; i<size; i++) {
-									Node n = new Node(Integer.parseInt(result.get(i+4)));
-									n.onModuleLoad();
-								}
-							}
-						});
+                    	String fileName = fileListBox.getValue(fileListBox.getSelectedIndex());
+                        if (fileName.length() == 0)
+                            Window.alert("Error!");
+                        load(fileName);
                     }
-                });    
+                });
+                
+                cancelButton.addClickHandler(new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						dialogBox.hide();
+					}
+				});
             }
 		});
         
@@ -232,14 +223,13 @@ public class Configuration implements EntryPoint {
 
 					@Override
 					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
-						
+						RootPanel.get("rpcLoad").setVisible(false);
+		            	RootPanel.get("rpcError").setVisible(true);
 					}
 
 					@Override
 					public void onSuccess(Void result) {
 						// TODO Auto-generated method stub
-						
 					}
 				});
             }
@@ -247,6 +237,9 @@ public class Configuration implements EntryPoint {
             
         logoutButton.addClickHandler(new ClickHandler() {
         	public void onClick(ClickEvent event) {
+        		
+        		save("lastSession");
+
                 RootPanel.get("clearButton").remove(clearButton);
             	RootPanel.get("saveButton").remove(saveButton);
             	RootPanel.get("loadButton").remove(loadButton);
@@ -262,6 +255,68 @@ public class Configuration implements EntryPoint {
             }
         });
     
+    }
+    
+    public void save(String fileName) {
+    	// save node values
+    	simulation.createNodeValues(false, null, null);
+    	ArrayList<String> values = new ArrayList<String>();
+    	values.add(fileName);
+    	values.add(Integer.toString(simulationTypeLB.getSelectedIndex()));
+    	values.add(durationHour.getText());
+    	values.add(durationMinute.getText());
+    	values.add(durationSecond.getText());
+    	greetingService.saveSimulation(values, new AsyncCallback<Void>() {
+    		@Override
+			public void onFailure(Throwable caught) {
+				RootPanel.get("rpcLoad").setVisible(false);
+            	RootPanel.get("rpcError").setVisible(true);
+    		}
+			@Override
+			public void onSuccess(Void result) {}
+			
+		});
+    }
+    
+    public void load(String fileName) {
+    	RootPanel.get("rpcLoad").setVisible(true);
+    	greetingService.loadSimulation(fileName, new AsyncCallback<ArrayList<String>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				RootPanel.get("rpcLoad").setVisible(false);
+            	RootPanel.get("rpcError").setVisible(true);
+			}
+
+			@Override
+			public void onSuccess(ArrayList<String> result) {
+				//for(String str : result) System.out.println(str);
+				/**
+				 * result format:
+				 * name, simulationType, duration, numberOfNode, 
+				 * (nodeId), ...
+				 */
+				simulation.setSimulationName(result.get(0));
+				simulation.setSimulationType(Integer.parseInt(result.get(1)));
+				String[] duration = result.get(2).split(":");
+				simulation.setSimulationDurationHour(duration[0]);
+				simulation.setSimulationDurationMinute(duration[1]);
+				simulation.setSimulationDurationSecond(duration[2]);
+				
+				nameTextField.setText(result.get(0));
+				simulationTypeLB.setSelectedIndex(Integer.parseInt(result.get(1)));
+				durationHour.setValue(duration[0]);
+				durationMinute.setValue(duration[1]);
+				durationHour.setValue(duration[2]);
+				
+				int size = Integer.parseInt(result.get(3));
+				for(int i=0; i<size; i++) {
+					RootPanel.get("rpcLoad").setVisible(true);
+					Node n = new Node(Integer.parseInt(result.get(i+4)));
+					n.onModuleLoad();
+				}
+			}
+		});
     }
     
     public static void refreshTheNodeList() {

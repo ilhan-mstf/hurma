@@ -83,7 +83,6 @@ public class Node implements EntryPoint {
 	}
 	
 	public void loadNode(String id) {
-		RootPanel.get("rpcLoad").setVisible(true);
 		greetingService.getNodeObjValuesById(id, new AsyncCallback<ArrayList<String>>() {
 
 			@Override
@@ -95,7 +94,6 @@ public class Node implements EntryPoint {
 			@Override
 			public void onSuccess(ArrayList<String> result) {
 				init(result);
-				RootPanel.get("rpcLoad").setVisible(false);
 			}
 		});
 	}
@@ -162,13 +160,11 @@ public class Node implements EntryPoint {
 	    }
 		
 		createDialogBox();
-		if(!isLoaded) {
-			RootPanel.get("rpcLoad").setVisible(false);
+		RootPanel.get("rpcLoad").setVisible(false);
+		if(!isLoaded)
 			dialogBox.center();
-		}
-		else {
+		else
 			addNode();
-		}
 	}
 	
 	@Override
@@ -232,6 +228,8 @@ public class Node implements EntryPoint {
 	
 						@Override
 						public void onFailure(Throwable caught) {
+							RootPanel.get("rpcLoad").setVisible(false);
+			            	RootPanel.get("rpcError").setVisible(true);
 						}
 	
 						@Override
@@ -261,6 +259,8 @@ public class Node implements EntryPoint {
 
 					@Override
 					public void onFailure(Throwable caught) {
+						RootPanel.get("rpcLoad").setVisible(false);
+		            	RootPanel.get("rpcError").setVisible(true);
 					}
 
 					@Override
@@ -496,6 +496,5 @@ public class Node implements EntryPoint {
 	public String getImage() {
 		return image;
 	}
-
 
 }
