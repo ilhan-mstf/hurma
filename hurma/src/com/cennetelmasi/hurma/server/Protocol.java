@@ -195,5 +195,4 @@ public class Protocol {
 	public StringBuffer getLog() {
 		return log;
 	}
-
 }
