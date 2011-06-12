@@ -18,9 +18,10 @@ public class SNMPagent extends Thread {
 	private final static ScheduledExecutorService scheduler = Executors
 			.newScheduledThreadPool(2);
 
-	public SNMPagent (String type, Protocol protocol, int time) {
+	public SNMPagent (String type, Protocol protocol, int time, int cofactor) {
 		this.setType(type);
 		this.setProtocol(protocol);
+		this.getProtocol().setCofactor(cofactor);
 		this.time = time;
 	}
 
@@ -52,7 +53,7 @@ public class SNMPagent extends Thread {
 				}
 			};
 			beeperHandle = scheduler
-					.scheduleAtFixedRate(beeper, 0, 10, TimeUnit.SECONDS);
+					.scheduleAtFixedRate(beeper, 0, 5, TimeUnit.SECONDS);
 			scheduler.schedule(new Runnable() {
 				public void run() {
 					beeperHandle.cancel(true);

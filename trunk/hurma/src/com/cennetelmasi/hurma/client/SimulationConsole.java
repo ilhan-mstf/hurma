@@ -155,7 +155,7 @@ public class SimulationConsole implements EntryPoint {
         		   Integer.parseInt(simulation.getSimulationDurationSecond());
         
         time /= cofactor;
-        greetingService.startSimulation(time, new AsyncCallback<Void>() {
+        greetingService.startSimulation(time, cofactor, new AsyncCallback<Void>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
@@ -168,7 +168,7 @@ public class SimulationConsole implements EntryPoint {
 				runText.append("> Simulation is started successfully...\n");
 				console.setText(runText.toString());
 				timer.scheduleRepeating(1000/cofactor);
-				serverTimer.scheduleRepeating(5000/cofactor);
+				serverTimer.scheduleRepeating(1000/cofactor);
 			}
 		});
 
@@ -220,7 +220,7 @@ public class SimulationConsole implements EntryPoint {
             	buttons.remove(resumeButton);
             	buttons.insert(pauseButton, 0);
             	timer.scheduleRepeating(1000/cofactor);
-            	serverTimer.scheduleRepeating(5000/cofactor);
+            	serverTimer.scheduleRepeating(1000/cofactor);
             	stopButton.setEnabled(true);
             }
     	});

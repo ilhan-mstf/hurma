@@ -24,6 +24,9 @@ public class Protocol {
 	Snmp snmp;
 
 	// initial values
+	private int cofactor;
+	
+
 	private String UdpAddress = "127.0.0.1/0";
 	private String community = "public";
 	private String ipAddress = "127.0.0.1";
@@ -66,6 +69,14 @@ public class Protocol {
 		return prob/totalSeconds;
 	}
 
+	public int getCofactor() {
+		return cofactor;
+	}
+
+	public void setCofactor(int cofactor) {
+		this.cofactor = cofactor;
+	}
+	
 	// NODE will execute this function during the simulation
 	public synchronized void run(NodeObj node) {
 		while (true) {
@@ -80,7 +91,7 @@ public class Protocol {
 			int iterator = 0;
 			for (Alarm alarm : node.getAlarms()) {
 				if(!alarm.isSelected())	continue;
-				float rate = node.getNumberOfDevices()*errorRateCalculation(alarm.getProb(),alarm.getFreq());
+				float rate = cofactor*node.getNumberOfDevices()*errorRateCalculation(alarm.getProb(),alarm.getFreq());
 				if(rate > 1) rate = 1;
 				
 				Random rand = new Random();
