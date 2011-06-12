@@ -1,26 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?><nodeTypes>
-	<nodeType> 
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeTypes>
+	<nodeType>
 		<id>1</id>
-		<MIBName>MIBs\OPENSTAGEPHONE-MIB</MIBName>
+		<MIBName>MIBs/OPENSTAGEPHONE-MIB</MIBName>
 		<name>OpenStagePhone</name>
-		<icon>0.jpg</icon>		
-	</nodeType>
-	<nodeType> 
-		<id>2</id>
-		<MIBName>MIBs\HiPath-MIB</MIBName>
-		<name>HiPath</name> 
 		<icon>0.jpg</icon>
 	</nodeType>
-<nodeType>
-<id>3</id>
-<MIBName>MIBs\OPENSTAGEPHONE-MIB2</MIBName>
-<name>mustafa</name>
-<icon>0.jpg</icon>
-</nodeType>
-<nodeType>
-<id>4</id>
-<MIBName>MIBs\OPENSTAGEPHONE-MIB2</MIBName>
-<name>osman</name>
-<icon>2.jpg</icon>
-</nodeType>
+	<nodeType>
+		<id>2</id>
+		<MIBName>MIBs/HiPath-MIB</MIBName>
+		<name>HiPath</name>
+		<icon>1.jpg</icon>
+	</nodeType>
 </nodeTypes>
