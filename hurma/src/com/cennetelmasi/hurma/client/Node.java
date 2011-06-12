@@ -216,7 +216,22 @@ public class Node implements EntryPoint {
 		
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-            	addNode();
+            	String ipAdress = ip.getText();
+            	String[] ips = ipAdress.split("\\.");
+            	if(ips.length != 4){
+            		Window.alert("Wrong IP format!");
+            		return;
+            	} else {
+            		for(int i = 0; i < ips.length; i++){
+            			try {
+            				int h = Integer.parseInt(ips[i]);
+            			} catch (NumberFormatException e){
+            				Window.alert("Wrong IP format!");
+            				return;
+            			}
+            		}
+            	}
+            		addNode();
             }
         });
         
