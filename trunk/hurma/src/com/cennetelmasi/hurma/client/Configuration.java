@@ -229,7 +229,7 @@ public class Configuration implements EntryPoint {
 
 					@Override
 					public void onSuccess(Void result) {
-						// TODO Auto-generated method stub
+						System.out.println("CLIENT: topology is cleared");
 					}
 				});
             }
@@ -273,7 +273,9 @@ public class Configuration implements EntryPoint {
             	RootPanel.get("rpcError").setVisible(true);
     		}
 			@Override
-			public void onSuccess(Void result) {}
+			public void onSuccess(Void result) {
+				Window.alert("Successfully saved!");
+			}
 			
 		});
     }
