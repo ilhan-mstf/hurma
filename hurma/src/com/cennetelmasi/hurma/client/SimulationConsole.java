@@ -153,6 +153,8 @@ public class SimulationConsole implements EntryPoint {
         int time = Integer.parseInt(simulation.getSimulationDurationHour())*60 +
         		   Integer.parseInt(simulation.getSimulationDurationMinute())*60 +
         		   Integer.parseInt(simulation.getSimulationDurationSecond());
+        
+        time /= cofactor;
         greetingService.startSimulation(time, new AsyncCallback<Void>() {
 
 			@Override
