@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><networkTopologies>
+<duration>00:01:00</duration>
+<simulationType>0</simulationType>
+<networkTopology>
+<node>
+<id>0</id>
+<name>OpenStagePhone</name>
+<mib>MIBs/OPENSTAGEPHONE-MIB</mib>
+<nodeType/>
+<trapRate>1.0</trapRate>
+<numberOfDevices>1</numberOfDevices>
+<alarms>
+<alarm oid="1.3.6.1.4.1.4329.2.38.3.2.2.1">traceEventFatal</alarm>
+<alarm oid="1.3.6.1.4.1.4329.2.38.3.2.2.2">traceEventError</alarm>
+</alarms>
+<fields>
+<field name="openStage20" oid="1.3.6.1.4.1.4329.2.38.3.1.1"/>
+<field name="openStage40" oid="1.3.6.1.4.1.4329.2.38.3.1.2"/>
+<field name="openStage60" oid="1.3.6.1.4.1.4329.2.38.3.1.3"/>
+<field name="openStage80" oid="1.3.6.1.4.1.4329.2.38.3.1.4"/>
+<field name="openStage20E" oid="1.3.6.1.4.1.4329.2.38.3.1.5"/>
+<field name="openStage15" oid="1.3.6.1.4.1.4329.2.38.3.1.6"/>
+<field name="phoneMacAddress" oid="1.3.6.1.4.1.4329.2.38.3.2.1.1.1"/>
+<field name="phoneIpAddress" oid="1.3.6.1.4.1.4329.2.38.3.2.1.1.2"/>
+<field name="phoneNumber" oid="1.3.6.1.4.1.4329.2.38.3.2.1.1.3"/>
+<field name="phoneType" oid="1.3.6.1.4.1.4329.2.38.3.2.1.1.4"/>
+<field name="phoneComponent" oid="1.3.6.1.4.1.4329.2.38.3.2.1.2.1"/>
+<field name="eventDateTime" oid="1.3.6.1.4.1.4329.2.38.3.2.1.2.2"/>
+<field name="eventDescription" oid="1.3.6.1.4.1.4329.2.38.3.2.1.2.3"/>
+<field name="serialNumber" oid="1.3.6.1.4.1.4329.2.38.3.2.1.3.1"/>
+<field name="certificateUsage" oid="1.3.6.1.4.1.4329.2.38.3.2.1.3.2"/>
+<field name="clientCertificate" oid="1.3.6.1.4.1.4329.2.38.3.2.1.3.3"/>
+<field name="expiryDate" oid="1.3.6.1.4.1.4329.2.38.3.2.1.3.4"/>
+</fields>
+</node>
+<node>
+<id>1</id>
+<name>HiPath</name>
+<mib>MIBs/HiPath-MIB</mib>
+<nodeType/>
+<trapRate>1.0</trapRate>
+<numberOfDevices>1</numberOfDevices>
+<alarms>
+<alarm oid="1.3.6.1.4.1.4329.2.22.90.1">hiPathHostUp</alarm>
+<alarm oid="1.3.6.1.4.1.4329.2.22.90.2">hiPathHostDown</alarm>
+</alarms>
+<fields>
+<field name="sysDesrc" oid="1.3.6.1.4.1.4329.2.22.1.1"/>
+<field name="sysContact" oid="1.3.6.1.4.1.4329.2.22.1.2"/>
+<field name="sysObjectID" oid="1.3.6.1.4.1.4329.2.22.1.3"/>
+<field name="sysLocation" oid="1.3.6.1.4.1.4329.2.22.1.4"/>
+<field name="agentVersion" oid="1.3.6.1.4.1.4329.2.22.1.5"/>
+<field name="mibVersion" oid="1.3.6.1.4.1.4329.2.22.1.6"/>
+<field name="hostname" oid="1.3.6.1.4.1.4329.2.22.1.7"/>
+<field name="sysState" oid="1.3.6.1.4.1.4329.2.22.1.8"/>
+<field name="sysStateReset" oid="1.3.6.1.4.1.4329.2.22.1.9"/>
+<field name="sysArch" oid="1.3.6.1.4.1.4329.2.22.1.10"/>
+<field name="osName" oid="1.3.6.1.4.1.4329.2.22.1.11"/>
+<field name="osVersion" oid="1.3.6.1.4.1.4329.2.22.1.12"/>
+<field name="sysMgmtURL" oid="1.3.6.1.4.1.4329.2.22.1.13"/>
+<field name="sysDocURL" oid="1.3.6.1.4.1.4329.2.22.1.14"/>
+<field name="sysIconURL" oid="1.3.6.1.4.1.4329.2.22.1.15"/>
+<field name="sysTimezone" oid="1.3.6.1.4.1.4329.2.22.1.16"/>
+<field name="sysVersion" oid="1.3.6.1.4.1.4329.2.22.1.17"/>
+<field name="appAppRegNumber" oid="1.3.6.1.4.1.4329.2.22.1.18"/>
+<field name="sysAppRegTable" oid="1.3.6.1.4.1.4329.2.22.1.19"/>
+<field name="sysAppRegTableEntry" oid="1.3.6.1.4.1.4329.2.22.1.19.1"/>
+<field name="appRegIndex" oid="1.3.6.1.4.1.4329.2.22.1.19.1.1"/>
+<field name="appRegURL" oid="1.3.6.1.4.1.4329.2.22.1.19.1.2"/>
+<field name="appNumber" oid="1.3.6.1.4.1.4329.2.22.2.1"/>
+<field name="appTable" oid="1.3.6.1.4.1.4329.2.22.2.2"/>
+<field name="appTableEntry" oid="1.3.6.1.4.1.4329.2.22.2.2.1"/>
+<field name="appName" oid="1.3.6.1.4.1.4329.2.22.2.2.1.1"/>
+<field name="appDescr" oid="1.3.6.1.4.1.4329.2.22.2.2.1.2"/>
+<field name="appContact" oid="1.3.6.1.4.1.4329.2.22.2.2.1.3"/>
+<field name="appVersion" oid="1.3.6.1.4.1.4329.2.22.2.2.1.4"/>
+<field name="appState" oid="1.3.6.1.4.1.4329.2.22.2.2.1.5"/>
+<field name="appStateReset" oid="1.3.6.1.4.1.4329.2.22.2.2.1.6"/>
+<field name="appMgmtURL" oid="1.3.6.1.4.1.4329.2.22.2.2.1.7"/>
+<field name="appDocURL" oid="1.3.6.1.4.1.4329.2.22.2.2.1.8"/>
+<field name="appIconURL" oid="1.3.6.1.4.1.4329.2.22.2.2.1.9"/>
+<field name="appId" oid="1.3.6.1.4.1.4329.2.22.2.2.1.10"/>
+<field name="appExecNumber" oid="1.3.6.1.4.1.4329.2.22.2.3"/>
+<field name="appExecTable" oid="1.3.6.1.4.1.4329.2.22.2.4"/>
+<field name="appExecTableEntry" oid="1.3.6.1.4.1.4329.2.22.2.4.1"/>
+<field name="appExecIdx" oid="1.3.6.1.4.1.4329.2.22.2.4.1.1"/>
+<field name="appExecAppName" oid="1.3.6.1.4.1.4329.2.22.2.4.1.2"/>
+<field name="appExecutable" oid="1.3.6.1.4.1.4329.2.22.2.4.1.3"/>
+<field name="processNumber" oid="1.3.6.1.4.1.4329.2.22.3.1"/>
+<field name="processTable" oid="1.3.6.1.4.1.4329.2.22.3.2"/>
+<field name="processTableEntry" oid="1.3.6.1.4.1.4329.2.22.3.2.1"/>
+<field name="processApp" oid="1.3.6.1.4.1.4329.2.22.3.2.1.1"/>
+<field name="processIndex" oid="1.3.6.1.4.1.4329.2.22.3.2.1.2"/>
+<field name="processPID" oid="1.3.6.1.4.1.4329.2.22.3.2.1.3"/>
+<field name="processParameter" oid="1.3.6.1.4.1.4329.2.22.3.2.1.4"/>
+<field name="processExecutable" oid="1.3.6.1.4.1.4329.2.22.3.2.1.5"/>
+<field name="processUp" oid="1.3.6.1.4.1.4329.2.22.3.2.1.6"/>
+<field name="processState" oid="1.3.6.1.4.1.4329.2.22.3.2.1.7"/>
+<field name="processStateReset" oid="1.3.6.1.4.1.4329.2.22.3.2.1.8"/>
+<field name="processMgmtURL" oid="1.3.6.1.4.1.4329.2.22.3.2.1.9"/>
+<field name="processDocURL" oid="1.3.6.1.4.1.4329.2.22.3.2.1.10"/>
+<field name="processIconURL" oid="1.3.6.1.4.1.4329.2.22.3.2.1.11"/>
+<field name="evtNumber" oid="1.3.6.1.4.1.4329.2.22.10.1"/>
+<field name="evtTable" oid="1.3.6.1.4.1.4329.2.22.10.2"/>
+<field name="evtTableEntry" oid="1.3.6.1.4.1.4329.2.22.10.2.1"/>
+<field name="evtAppName" oid="1.3.6.1.4.1.4329.2.22.10.2.1.1"/>
+<field name="evtProcess" oid="1.3.6.1.4.1.4329.2.22.10.2.1.2"/>
+<field name="evtLogIndex" oid="1.3.6.1.4.1.4329.2.22.10.2.1.3"/>
+<field name="evtOID" oid="1.3.6.1.4.1.4329.2.22.10.2.1.4"/>
+<field name="evtDate" oid="1.3.6.1.4.1.4329.2.22.10.2.1.5"/>
+<field name="evtSeverity" oid="1.3.6.1.4.1.4329.2.22.10.2.1.6"/>
+<field name="evtDescr" oid="1.3.6.1.4.1.4329.2.22.10.2.1.7"/>
+<field name="evtHistoryTable" oid="1.3.6.1.4.1.4329.2.22.10.3"/>
+<field name="evtHistoryTableEntry" oid="1.3.6.1.4.1.4329.2.22.10.3.1"/>
+<field name="evtHistoryAppName" oid="1.3.6.1.4.1.4329.2.22.10.3.1.1"/>
+<field name="evtHistoryProcess" oid="1.3.6.1.4.1.4329.2.22.10.3.1.2"/>
+<field name="evtHistoryLogIndex" oid="1.3.6.1.4.1.4329.2.22.10.3.1.3"/>
+<field name="evtHistoryOID" oid="1.3.6.1.4.1.4329.2.22.10.3.1.4"/>
+<field name="evtHistoryDate" oid="1.3.6.1.4.1.4329.2.22.10.3.1.5"/>
+<field name="evtHistorySeverity" oid="1.3.6.1.4.1.4329.2.22.10.3.1.6"/>
+<field name="evtHistoryDescr" oid="1.3.6.1.4.1.4329.2.22.10.3.1.7"/>
+<field name="hiPathTrapCounter" oid="1.3.6.1.4.1.4329.2.22.90.99"/>
+<field name="hiPathTrapSeverity" oid="1.3.6.1.4.1.4329.2.22.90.100"/>
+</fields>
+</node>
+</networkTopology>
+</networkTopologies>
