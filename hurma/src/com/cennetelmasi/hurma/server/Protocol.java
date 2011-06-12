@@ -92,7 +92,7 @@ public class Protocol {
 			int iterator = 0;
 			for (Alarm alarm : node.getAlarms()) {
 				if(!alarm.isSelected())	continue;
-				float rate = cofactor*node.getNumberOfDevices()*errorRateCalculation(alarm.getProb(),alarm.getFreq());
+				float rate = node.getNumberOfDevices()*errorRateCalculation(alarm.getProb(),alarm.getFreq());
 				if(rate > 1) rate = 1;
 				
 				Random rand = new Random();

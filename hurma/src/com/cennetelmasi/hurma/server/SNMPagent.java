@@ -44,7 +44,7 @@ public class SNMPagent extends Thread {
 						protocol.setPassedTime(protocol.getPassedTime()+5);
 						getProtocol().wakeUp();
 						// wait util deciding to sending traps
-						sleep(100);
+						sleep(100/getProtocol().getCofactor());
 						getProtocol().checkQueue();
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -53,13 +53,12 @@ public class SNMPagent extends Thread {
 					}
 				}
 			};
-			beeperHandle = scheduler
-					.scheduleAtFixedRate(beeper, 0, 5, TimeUnit.SECONDS);
+			beeperHandle = scheduler.scheduleAtFixedRate(beeper, 0, 5000/getProtocol().getCofactor(), TimeUnit.MILLISECONDS);
 			scheduler.schedule(new Runnable() {
 				public void run() {
 					beeperHandle.cancel(true);
 				}
-			}, time, TimeUnit.SECONDS);
+			}, 1000*time/getProtocol().getCofactor(), TimeUnit.MILLISECONDS);
 		} else {
 			getProtocol().run(getNode());
 		}
@@ -72,7 +71,7 @@ public class SNMPagent extends Thread {
 	
 	public void resumeScheduler() {
 		beeperHandle = scheduler
-				.scheduleAtFixedRate(beeper, 0, 5, TimeUnit.SECONDS);
+				.scheduleAtFixedRate(beeper, 0, 5000/getProtocol().getCofactor(), TimeUnit.MILLISECONDS);
 	}
 
 	public void setType(String type) {
