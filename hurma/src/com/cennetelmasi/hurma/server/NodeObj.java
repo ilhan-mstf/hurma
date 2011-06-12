@@ -18,10 +18,10 @@ import net.percederberg.mibble.value.ObjectIdentifierValue;
 
 public class NodeObj {
 	private int id;
-	private String nodeTypeName;
-	private float probability;
 	private int numberOfDevices;
+	private String ip;
 	private String nodeName;
+	private String image;
 	
 	private String MIB;
 	private ArrayList<MIBObject> mibObjects;
@@ -172,22 +172,6 @@ public class NodeObj {
 		return id;
 	}
 
-	public void setNodeTypeName(String nodeTypeName) {
-		this.nodeTypeName = nodeTypeName;
-	}
-
-	public String getNodeTypeName() {
-		return nodeTypeName;
-	}
-
-	public void setProbability(float probability) {
-		this.probability = probability;
-	}
-
-	public float getProbability() {
-		return probability;
-	}
-
 	public void setNumberOfDevices(int numberOfDevices) {
 		this.numberOfDevices = numberOfDevices;
 	}
@@ -202,6 +186,22 @@ public class NodeObj {
 
 	public String getNodeName() {
 		return nodeName;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	public String getImage() {
+		return image;
 	}
 
 }

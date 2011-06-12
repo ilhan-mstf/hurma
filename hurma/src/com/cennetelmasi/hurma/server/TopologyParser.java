@@ -1,7 +1,6 @@
 package com.cennetelmasi.hurma.server;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -16,15 +15,18 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.io.File;
 
 public class TopologyParser extends DefaultHandler{
-	static List<TopologyObject> nodeTypes;
+	static TopologyObject topology;
 	private String tempVal;
-	private static TopologyObject tempNode;
+	
 	private static NodeObj node;
 	private static boolean isField = false;
 	private static boolean isAlarm = false;
 	private static String oid = "";
+	private static Float probability;
+	private static int frequency;
+	
 	public TopologyParser() {
-		nodeTypes = new ArrayList<TopologyObject>();
+		topology = new TopologyObject();
 	}
 
 	public void parseDocument(File file) {
@@ -44,16 +46,17 @@ public class TopologyParser extends DefaultHandler{
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		tempVal = "";
 		
-		if(qName.equalsIgnoreCase("networkTopologies")) {
-			tempNode = new TopologyObject();
+		if(qName.equalsIgnoreCase("node")) {
 			node = new NodeObj();
-			tempNode.addToNode(node);
+			topology.addToNode(node);
 		} else if(qName.equalsIgnoreCase("field")) {
 			isField = true;
 			oid = attributes.getValue("oid");
 		} else if(qName.equalsIgnoreCase("alarm")) {
 			isAlarm = true;
 			oid = attributes.getValue("oid");
+			probability = Float.parseFloat(attributes.getValue("probability"));
+			frequency = Integer.parseInt(attributes.getValue("frequency"));
 		}
 	}
 	
@@ -63,28 +66,26 @@ public class TopologyParser extends DefaultHandler{
 	
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 
-		if(isField){
+		if(isField) {
 			node.setMibObjectByOid(oid, tempVal);
 			oid = "";
 			isField = false;
 		} else if(isAlarm){
-			node.getAlarmByOid(oid).setSelectStatus(true);
+			Alarm alarm = node.getAlarmByOid(oid);
+			alarm.setSelectStatus(true);
+			alarm.setProb(probability);
+			alarm.setFreq(frequency);
 			oid = "";
 			isAlarm = false;
-		} else if(qName.equalsIgnoreCase("networkTopologies")) {
-			nodeTypes.add(tempNode);	
-		}else if (qName.equalsIgnoreCase("duration")) {
-			tempNode.setDuration(tempVal);
-		}else if (qName.equalsIgnoreCase("simulationType")) {
-			tempNode.setName(tempVal);
-		}else if (qName.equalsIgnoreCase("node")) {
-			node = new NodeObj();
-			tempNode.addToNode(node);
-		}else if (qName.equalsIgnoreCase("id")) {
+		} else if (qName.equalsIgnoreCase("duration")) {
+			topology.setDuration(tempVal);
+		} else if (qName.equalsIgnoreCase("simulationType")) {
+			topology.setSimulationType(tempVal);
+		} else if (qName.equalsIgnoreCase("id")) {
 			node.setId(Integer.parseInt(tempVal));
-		}else if (qName.equalsIgnoreCase("name")) {
+		} else if (qName.equalsIgnoreCase("name")) {
 			node.setNodeName(tempVal);
-		}else if (qName.equalsIgnoreCase("mib")) {
+		} else if (qName.equalsIgnoreCase("mib")) {
 			node.setMIB(tempVal);
 			try {
 				node.parseMIB();
@@ -93,17 +94,17 @@ public class TopologyParser extends DefaultHandler{
 			} catch (MibLoaderException e) {
 				e.printStackTrace();
 			}
-		}else if (qName.equalsIgnoreCase("trapRate")) {
-			node.setProbability(Float.parseFloat(tempVal));
-		}else if (qName.equalsIgnoreCase("numberOfDevices")) {
+		} else if (qName.equalsIgnoreCase("numberOfDevices")) {
 			node.setNumberOfDevices(Integer.parseInt(tempVal));
-		}else if (qName.equalsIgnoreCase("nodeType")) {
-			node.setNodeTypeName(tempVal);
+		} else if (qName.equalsIgnoreCase("ip")) {
+			node.setIp(tempVal);
+		} else if (qName.equalsIgnoreCase("image")) {
+			node.setImage(tempVal);
 		}
 	}
 
-	public static List<TopologyObject> getNodeTypes() {
-		return nodeTypes;
+	public static TopologyObject getTopology() {
+		return topology;
 	}
 
 }

@@ -11,10 +11,11 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("greet")
 public interface GreetingService extends RemoteService {
         String greetServer(String name, String pass);
-		ArrayList<String> getNodeObjValues(String mib);
+		ArrayList<String> createNode(String mib);
+		ArrayList<String> getNodeObjValuesById(String id);
 		void setNodeObjValues(ArrayList<String> values,
-				ArrayList<String> selectedAlarms,
-				ArrayList<String> requiredFields);
+							   ArrayList<String> selectedAlarms,
+							   ArrayList<String> requiredFields);
 		ArrayList<String> getNodeTypes();
 		void deleteNodeObj(String id);
 		void startSimulation(int time);
@@ -28,6 +29,7 @@ public interface GreetingService extends RemoteService {
 		void saveSimulation(ArrayList<String> values);
 		ArrayList<String> getSavedSimulationName();
 		ArrayList<String> loadSimulation(String simulationName);
+		void clear();
 		
 //        String[] getNodeTypeValues(int index);
 //        String sendSimulationConfiguration(String[] values, String[] alarms, String[] fields);

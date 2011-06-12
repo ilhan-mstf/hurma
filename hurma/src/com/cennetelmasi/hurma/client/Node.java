@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -29,165 +30,163 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class Node implements EntryPoint {
 	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
-	private int id;
 	private int nodeId;
 	private String image;
 	private String nodeTypeName;
 	private String mib;
-	private int numberOfDevice;
-	private float prob;
 	private boolean created = false;
+	private boolean isLoaded = true;
 	
     // Create list of alarms and properties
-    private final ArrayList<CheckBox> checkBoxList = new ArrayList<CheckBox>();
+    private final ArrayList<CheckBox> alarmList = new ArrayList<CheckBox>();
+    private final ArrayList<TextBox> probList = new ArrayList<TextBox>();
+    private final ArrayList<ListBox> frequencyList = new ArrayList<ListBox>();
     private final ArrayList<TextBox> propertyList = new ArrayList<TextBox>();
+    
+    private final TextBox numberOfDevices = new TextBox();
+    private final TextBox ip = new TextBox();
+    private final Image img = new Image();
+    
+	final VerticalPanel nodePanel = new VerticalPanel();
+	final VerticalPanel alarmPanel = new VerticalPanel();
+	final FlexTable layout = new FlexTable();
+    
+    final Button okButton = new Button("OK");
+    final Button cancelButton = new Button("Cancel");
+    final DialogBox dialogBox = new DialogBox();
+    
+    public Node(int id) {
+    	this.nodeId = id;
+    }
 	
-	public Node(int id, String nodeTypeName, String mib, String img) {
-		this.id = id;
+	public Node(String nodeTypeName, String mib, String img, boolean isLoaded) {
 		this.setNodeTypeName(nodeTypeName);
 		this.setMib(mib);
-		this.image = img;
+		this.setImage(img);
+		this.isLoaded = isLoaded;
+	}
+	
+	public void createNode() {
+		greetingService.createNode(mib, new AsyncCallback<ArrayList<String>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+            	RootPanel.get("rpcLoad").setVisible(false);
+            	RootPanel.get("rpcError").setVisible(true);
+			}
+
+			@Override
+			public void onSuccess(ArrayList<String> result) {
+			    init(result);
+			}
+		});
+	}
+	
+	public void loadNode(String id) {
+		RootPanel.get("rpcLoad").setVisible(true);
+		greetingService.getNodeObjValuesById(id, new AsyncCallback<ArrayList<String>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				RootPanel.get("rpcLoad").setVisible(false);
+            	RootPanel.get("rpcError").setVisible(true);
+			}
+
+			@Override
+			public void onSuccess(ArrayList<String> result) {
+				init(result);
+				RootPanel.get("rpcLoad").setVisible(false);
+			}
+		});
+	}
+	
+	public void init(ArrayList<String> result) {
+		/**
+	     * result format:
+	     * id, nodeName, numberOfDevices, ip, image
+	     * numberofAlarms, (AlarmName, AlarmOID, isSelected, AlarmProb, AlarmFreq, ), ... 
+	     * (ObjectName, ObjectOID, ObjectValue), ...
+	     */
+		
+		nodeId = Integer.parseInt(result.get(0));
+		if(result.get(1) != null)
+			nodeTypeName = result.get(1);
+		
+		numberOfDevices.setText("Number Of Devices: ");
+		numberOfDevices.setValue(result.get(2));
+		
+		ip.setText("IP: ");
+		ip.setValue(result.get(3));
+		
+		if(result.get(4) != null)
+			image = result.get(4);
+		
+		// Set alarms
+		// Calculate alarm boundary
+		// size = result[3]
+		// Each alarm is 4 array element
+		int alarmBoundary = Integer.parseInt(result.get(5))*5+6;
+		for(int i = 6; i < alarmBoundary; i++) {
+	        CheckBox checkBox = new CheckBox(result.get(i++));
+	        checkBox.getElement().setId(result.get(i));
+	        checkBox.ensureDebugId(result.get(i++));
+	        checkBox.setValue(Boolean.parseBoolean(result.get(i++)));
+	        alarmList.add(checkBox);
+	        
+	        TextBox prob = new TextBox();
+	        prob.setValue(result.get(i++));
+	        prob.setWidth("30px");
+	        probList.add(prob);
+	        
+	        ListBox freq = new ListBox();
+	        freq.addItem("second");
+	        freq.addItem("minute");
+	        freq.addItem("hour");
+	        freq.addItem("day");
+	        freq.addItem("week");
+	        freq.addItem("month");
+	        freq.addItem("year");
+	        freq.setItemSelected(Integer.parseInt(result.get(i)), true);
+	        frequencyList.add(freq);
+	    }
+		
+		// Set objects
+		int objectBoundary = result.size();
+		for(int i = alarmBoundary; i < objectBoundary; i++) {
+	    	String property = result.get(i++);
+	        TextBox field = new TextBox();
+	        field.setTitle(property);
+	        field.getElement().setId(result.get(i++));
+	        field.setValue(result.get(i));
+	        getPropertyList().add(field);
+	    }
+		
+		createDialogBox();
+		if(!isLoaded) {
+			RootPanel.get("rpcLoad").setVisible(false);
+			dialogBox.center();
+		}
+		else {
+			addNode();
+		}
 	}
 	
 	@Override
 	public void onModuleLoad() {
 		
-		/********************
-		 * DialogBox Code   *
-		 ********************/
+		if(isLoaded)
+			loadNode(nodeId+"");
+		else
+			createNode();
 		
-        // Create dialogBox, set properties
-		final DialogBox dialogBox = new DialogBox();
-        dialogBox.setText("Select alarms and fill required fields.");
-        dialogBox.setGlassEnabled(true);
-        dialogBox.setAnimationEnabled(true);
-		        
-        /********************************************************************
-         * DialogBox style													*
-         * 																	*
-         * V Panel-0														*
-         * ---------------------------------------------------------------- *
-         * H Panel-0														*
-         * ---------------------------------------------------------------- *
-         * V Panel-1		| V Panel-2										*
-         * -Alarms...		| H Panel-1										*
-         * -				| --------------------------------------------- *
-         * -				| V Panel-3 	| V Panel-4 	| V Panel-5		*
-         * -				|				|				|				*
-         * -				|				|				|				*
-         * ---------------------------------------------------------------- *
-         * H Panel-3														*
-         * OK, Cancel Buttons												*
-         ********************************************************************/
-		
-        // Create Horizontal and Vertical Panels, set properties
-		final VerticalPanel[] dialogVPanel = new VerticalPanel[6];
-		final HorizontalPanel[] dialogHPanel = new HorizontalPanel[3];
-		for(int i=0; i<6; i++)
-			dialogVPanel[i] = new VerticalPanel();
-		for(int i=0; i<3; i++) {
-			dialogHPanel[i] = new HorizontalPanel();
-			dialogHPanel[i].setSpacing(5);
-		}
-        
-        HTML label = new HTML("<b>Alarms of device</b><br />");
-        label.addStyleName("label-DialogBox");
-        dialogVPanel[1].add(label);
-		// Add check-boxes of alarms
-        // Make server call
-        greetingService.getNodeObjValues(getMib(), new AsyncCallback<ArrayList<String>>() {
-            public void onFailure(Throwable caught) {
-            	RootPanel.get("rpcLoad").setVisible(false);
-            	RootPanel.get("rpcError").setVisible(true);
-            }
-
-			@Override
-			public void onSuccess(ArrayList<String> result) {
-				/**
-			     * result format:
-			     * id, numberofAlarms, (AlarmName, AlarmOID), ... (ObjectName, ObjectOID) ...
-			     */
-				// set id
-				setNodeId(Integer.parseInt(result.get(0)));
-				// calculate alarm boundary
-				// size = result[1]
-				// each alarm is 2 array element
-				int alarmBoundary = Integer.parseInt(result.get(1))*2+2;
-				for(int i = 2; i < alarmBoundary; i++) {
-			        CheckBox checkBox = new CheckBox(result.get(i));
-			        i++;
-			        checkBox.getElement().setId(result.get(i));
-			        checkBox.ensureDebugId(result.get(i));
-			        dialogVPanel[1].add(checkBox);
-			        getCheckBoxList().add(checkBox);
-			    }
-		        HTML label = new HTML("<b>Required Fields</b>");
-		        label.addStyleName("label-DialogBox");
-		        dialogVPanel[2].insert(label, 0);
-				// Number of devices
-				TextBox numberOfDevices = new TextBox();
-				numberOfDevices.getElement().setTitle("numberOfDevices");
-				label = new HTML("<b>Number of devices:</b>");
-				dialogVPanel[3].add(label);
-				dialogVPanel[3].add(numberOfDevices);
-				getPropertyList().add(numberOfDevices);
-				// Probability
-				TextBox prob = new TextBox();
-				prob.getElement().setTitle("errorProbability");
-				label = new HTML("<b>Error probability:</b>");
-				dialogVPanel[3].add(label);
-				dialogVPanel[3].add(prob);
-				getPropertyList().add(prob);
-				// required fields
-				int objectBoundary = result.size();
-				int objectSize = objectBoundary-alarmBoundary+2;
-				int max = objectSize/4-1;
-				for(int i = alarmBoundary, panelIndex = 3; i < objectBoundary; i++) {
-			    	String property = result.get(i++);
-			    	label = new HTML("<b>"+ property +":</b>");
-			        dialogVPanel[panelIndex].add(label);
-			        TextBox field = new TextBox();
-			        field.getElement().setTitle(property);
-			        field.getElement().setId(result.get(i));
-			        getPropertyList().add(field);
-			        dialogVPanel[panelIndex].add(field);
-			        if(i/2%max==0) panelIndex++;
-			    }
-            	RootPanel.get("rpcLoad").setVisible(false);
-				dialogBox.center();
-			}
-        });
-        
-        // Create Buttons and set properties
-        final Button okButton = new Button("OK");
-        final Button cancelButton = new Button("Cancel");
-        okButton.getElement().setId("okButton");
-        cancelButton.getElement().setId("cancelButton");
-        okButton.addStyleName("left");
-        cancelButton.addStyleName("left");
-
-        // Unify all panels and buttons
-        dialogHPanel[2].add(okButton);
-        dialogHPanel[2].add(cancelButton);
-        for(int i=3; i<6; i++)
-        	dialogHPanel[1].add(dialogVPanel[i]);
-        dialogVPanel[2].add(dialogHPanel[1]);
-        dialogHPanel[0].add(dialogVPanel[1]);
-        dialogHPanel[0].add(dialogVPanel[2]);
-        dialogVPanel[0].add(dialogHPanel[0]);
-        dialogVPanel[0].add(dialogHPanel[2]);
-        dialogBox.setWidget(dialogVPanel[0]);
-        
 		/********************
 		 * NODE Code        *
 		 ********************/
         
 		// Add the disclosure panels to a panel
-		final VerticalPanel vPanel = new VerticalPanel();
-		vPanel.setSpacing(8);
+		nodePanel.setSpacing(8);
 		
 		// Create a table to layout the form options
-		final FlexTable layout = new FlexTable();
 		layout.setCellSpacing(3);
 		
 		final Button removeButton = new Button("Remove");
@@ -195,10 +194,6 @@ public class Node implements EntryPoint {
 		final Button editButton = new Button("Edit");
 		editButton.addStyleName("right");
 		
-		final Image img = new Image("img/" + this.image);
-		
-		// Add a title to the form
-		layout.setHTML(0, 0, "<b>" + getNodeTypeName() + " - " + getNodeId() + "</b>");
 		layout.setWidget(0, 2, removeButton);
 		layout.setWidget(0, 1, editButton);
 		layout.setWidget(1, 0, img);
@@ -207,7 +202,6 @@ public class Node implements EntryPoint {
 		final DisclosurePanel advancedDisclosure = new DisclosurePanel("Alarms and Values");
 		advancedDisclosure.setAnimationEnabled(true);
 		advancedDisclosure.ensureDebugId("debugId");
-		final VerticalPanel alarmPanel = new VerticalPanel();
 		advancedDisclosure.setContent(alarmPanel);
 		
 		final VerticalPanel innerPanel = new VerticalPanel();
@@ -218,7 +212,7 @@ public class Node implements EntryPoint {
 		final DecoratorPanel decPanel = new DecoratorPanel();
 		decPanel.setWidget(innerPanel);
 		
-		vPanel.add(decPanel);
+		nodePanel.add(decPanel);
 		
 		/********************
 		 * BUTTON Handlers  *
@@ -226,33 +220,7 @@ public class Node implements EntryPoint {
 		
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-            	if(getPropertyList().get(0).getValue().isEmpty() && getPropertyList().get(1).getValue().isEmpty()){
-                	Window.alert("Please enter number of devices and error probability!");
-					
-                } else if(getPropertyList().get(0).getValue().isEmpty()){
-                	Window.alert("Please enter number of devices!");
-					
-                } else if(getPropertyList().get(1).getValue().isEmpty()){
-                	Window.alert("Please enter error probability!");
-					
-                } else {
-                	layout.setHTML(0, 0, "<b>" + getNodeTypeName() + " - " + getNodeId() + "</b>");
-                	setCreated(true);
-                    dialogBox.hide();
-                    alarmPanel.clear();
-                    for(int i=0; i<getCheckBoxList().size(); i++) {
-                    	if(getCheckBoxList().get(i).getValue()) {
-                    		alarmPanel.add(new HTML(" -> " + getCheckBoxList().get(i).getHTML()));
-                    	}
-                    }
-                    for(int i=0; i<getPropertyList().size(); i++){
-                    	alarmPanel.add(new HTML(getPropertyList().get(i).getTitle() + ": " + getPropertyList().get(i).getValue()));
-                    }
-                    vPanel.setStyleName("left");
-                    RootPanel.get("networkTopology").add(vPanel);
-                	numberOfDevice = Integer.parseInt(getPropertyList().get(0).getValue());
-                    prob = Float.parseFloat(getPropertyList().get(1).getValue());
-                }
+            	addNode();
             }
         });
         
@@ -260,7 +228,7 @@ public class Node implements EntryPoint {
 			public void onClick(ClickEvent event) {
 				dialogBox.hide();
 				if(!created) {
-					greetingService.deleteNodeObj(Integer.toString(id), new AsyncCallback<Void>() {
+					greetingService.deleteNodeObj(Integer.toString(nodeId), new AsyncCallback<Void>() {
 	
 						@Override
 						public void onFailure(Throwable caught) {
@@ -283,13 +251,13 @@ public class Node implements EntryPoint {
         removeButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
             	setCreated(false);
-            	vPanel.removeFromParent();
+            	nodePanel.removeFromParent();
             	try {
 					finalize();
 				} catch (Throwable e) {
 					e.printStackTrace();
 				}
-				greetingService.deleteNodeObj(Integer.toString(id), new AsyncCallback<Void>() {
+				greetingService.deleteNodeObj(Integer.toString(nodeId), new AsyncCallback<Void>() {
 
 					@Override
 					public void onFailure(Throwable caught) {
@@ -303,15 +271,168 @@ public class Node implements EntryPoint {
         });
         
 	}
-
-	public void setId(int id) {
-		this.id = id;
+	
+	public void addNode() {
+		if(getNumberOfDevices().getValue().isEmpty()) {
+        	Window.alert("Please enter number of devices!");
+        } else {
+        	img.setUrl("img/" + this.image);
+        	layout.setHTML(0, 0, "<b>" + getNodeTypeName() + " - " + getNodeId() + "</b>");
+        	
+        	setCreated(true);
+            dialogBox.hide();
+            alarmPanel.clear();
+            int size = alarmList.size();
+            for(int i=0; i<size; i++) {
+            	if(alarmList.get(i).getValue()) {
+            		alarmPanel.add(new HTML(" -> " + alarmList.get(i).getHTML()));
+            	}
+            }
+            for(int i=0; i<getPropertyList().size(); i++) {
+            	alarmPanel.add(new HTML(getPropertyList().get(i).getTitle() + ": " + getPropertyList().get(i).getValue()));
+            }
+            nodePanel.setStyleName("left");
+            RootPanel.get("networkTopology").add(nodePanel);
+        }
 	}
+	
+	public void createDialogBox() {
+		// Create dialogBox and set properties
+		dialogBox.setText("Select alarms and fill required fields.");
+		dialogBox.setGlassEnabled(true);
+		dialogBox.setAnimationEnabled(true);
+		
+		/********************************************************************
+		 * DialogBox style													*
+		 * 																	*
+		 * V Panel-0														*
+		 * ---------------------------------------------------------------- *
+		 * H Panel-0														*
+		 * ---------------------------------------------------------------- *
+		 * V Panel-1		| V Panel-2										*
+		 * -Alarms...		| H Panel-1										*
+		 * -				| --------------------------------------------- *
+		 * -				| V Panel-3 	| V Panel-4 	| V Panel-5		*
+		 * -				|				|				|				*
+		 * -				|				|				|				*
+		 * ---------------------------------------------------------------- *
+		 * H Panel-3														*
+		 * OK, Cancel Buttons												*
+		 ********************************************************************/
+		
+		final VerticalPanel mainContainer = new VerticalPanel();
+		final VerticalPanel leftContainer = new VerticalPanel();
+		final VerticalPanel rightContainer = new VerticalPanel();
+		final VerticalPanel propertiesColoumn[] = new VerticalPanel[2];
+		final VerticalPanel alarmsColoumn[] = new VerticalPanel[4];	
+		final VerticalPanel fieldsColoumn[] = new VerticalPanel[3];
+		
+		mainContainer.setStyleName("pop-up");
+		
+		final HorizontalPanel mainContainerRow = new HorizontalPanel();
+		final HorizontalPanel propertiesRow = new HorizontalPanel();
+		final HorizontalPanel alarmsRow = new HorizontalPanel();
+		final HorizontalPanel fieldsRow = new HorizontalPanel();
+		final HorizontalPanel buttons = new HorizontalPanel();
+		
+		mainContainerRow.setSpacing(6);
+		alarmsRow.setSpacing(6);
+		fieldsRow.setSpacing(6);
+		buttons.setSpacing(6);
+		
+		/********************
+		 * LEFT CONTAINER   *
+		 ********************/
+		
+		for(int i=0; i<2; i++) {
+			propertiesColoumn[i] = new VerticalPanel();
+			propertiesRow.add(propertiesColoumn[i]);
+		}
+		propertiesRow.setSpacing(6);
+		
+		// NUMBER_OF_DEVICES, IP, MAC
+		HTML label = new HTML("Properties of Device");
+		label.addStyleName("label-DialogBox");
+		
+		leftContainer.insert(label, 0);
+		leftContainer.add(propertiesRow);
+		
+		label = new HTML("<b>Number Of Devices:</b>");
+		propertiesColoumn[0].add(label);
+		propertiesColoumn[1].add(numberOfDevices);
+		
+		label = new HTML("<b>IP:</b>");
+		propertiesColoumn[0].add(label);
+		propertiesColoumn[1].add(ip);
+		
+		// ALARMS
+		label = new HTML("Alarms of device");
+		label.addStyleName("label-DialogBox");
+		
+		leftContainer.add(label);
+		leftContainer.add(alarmsRow);
+		
+		for(int i=0; i<4; i++) {
+			alarmsColoumn[i] = new VerticalPanel();
+			alarmsRow.add(alarmsColoumn[i]);
+		}
+		
+		// Add alarms
+		int size = getAlarmList().size();
+		for(int i=0 ; i<size; i++) {
+			alarmsColoumn[0].add(getAlarmList().get(i));
+			alarmsColoumn[1].add(getProbList().get(i));
+			label = new HTML("times in a");
+			alarmsColoumn[2].add(label);
+			alarmsColoumn[3].add(getFrequencyList().get(i));
+		}
+		
+		/********************
+		 * RIGHT CONTAINER  *
+		 ********************/
+		
+		// REQUIRED FIELDS
+        label = new HTML("Required Fields");
+        label.addStyleName("label-DialogBox");
+        
+        rightContainer.insert(label, 0);
+        rightContainer.add(fieldsRow);
+        
+		for(int i=0; i<3; i++) {
+			fieldsColoumn[i] = new VerticalPanel();
+			fieldsRow.add(fieldsColoumn[i]);
+		}
+        
+		// Add required fields
+		int objectBoundary = getPropertyList().size();
+		int max = objectBoundary/3+1;
+		//System.out.println("max: " + max + " size: " + objectBoundary);
+		for(int i = 0, panelIndex = 0; i < objectBoundary;) {
+			String property = getPropertyList().get(i).getElement().getTitle();
+	    	label = new HTML("<b>"+ property +":</b>");
+	        fieldsColoumn[panelIndex].add(label);
+	        fieldsColoumn[panelIndex].add(getPropertyList().get(i));
+	        i++;
+	        if(i%max==0) panelIndex++;
+	    }
+		
+        // Create Buttons and set properties
+        okButton.getElement().setId("okButton");
+        cancelButton.getElement().setId("cancelButton");
+        okButton.addStyleName("left");
+        cancelButton.addStyleName("left");
 
-	public int getId() {
-		return id;
+        buttons.add(okButton);
+        buttons.add(cancelButton);
+        
+        // Unify all panels and buttons
+        mainContainerRow.add(leftContainer);
+        mainContainerRow.add(rightContainer);
+        mainContainer.add(mainContainerRow);
+        mainContainer.add(buttons);
+        dialogBox.setWidget(mainContainer);
 	}
-
+	
 	public void setNodeTypeName(String nodeTypeName) {
 		this.nodeTypeName = nodeTypeName;
 	}
@@ -326,26 +447,6 @@ public class Node implements EntryPoint {
 
 	public String getMib() {
 		return mib;
-	}
-
-	public void setNumberOfDevice(int numberOfDevice) {
-		this.numberOfDevice = numberOfDevice;
-	}
-
-	public int getNumberOfDevice() {
-		return numberOfDevice;
-	}
-
-	public void setProb(float prob) {
-		this.prob = prob;
-	}
-
-	public float getProb() {
-		return prob;
-	}
-
-	public ArrayList<CheckBox> getCheckBoxList() {
-		return checkBoxList;
 	}
 
 	public ArrayList<TextBox> getPropertyList() {
@@ -367,5 +468,34 @@ public class Node implements EntryPoint {
 	public int getNodeId() {
 		return nodeId;
 	}
+	
+	public ArrayList<CheckBox> getAlarmList() {
+		return alarmList;
+	}
+
+	public ArrayList<TextBox> getProbList() {
+		return probList;
+	}
+
+	public ArrayList<ListBox> getFrequencyList() {
+		return frequencyList;
+	}
+	
+	public TextBox getNumberOfDevices() {
+		return numberOfDevices;
+	}
+
+	public TextBox getIp() {
+		return ip;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
 
 }
