@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class SimulationConsole implements EntryPoint {
 	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
 	private Simulation simulation;
-	
+	private int cofactor;
 	final Button logoutButton 		= new Button("Logout");
     final Button pauseButton 		= new Button("Pause");
     final Button resumeButton 		= new Button("Resume");
@@ -41,6 +41,10 @@ public class SimulationConsole implements EntryPoint {
     	/*********************
 		 * Initialize pop-up *
 		 *********************/
+		cofactor = 1;
+		for(int mustafa = 0; mustafa < simulation.getSimulationType(); mustafa++){
+			cofactor *= 2;
+		}
 		
 		HorizontalPanel controlPanel = new HorizontalPanel();
 		final HorizontalPanel buttons = new HorizontalPanel();
@@ -107,6 +111,7 @@ public class SimulationConsole implements EntryPoint {
 			
     		@Override
 			public void run() {
+    			
     			sec++;
     			if(sec >= 60){
     				sec = 0;
@@ -160,8 +165,8 @@ public class SimulationConsole implements EntryPoint {
 			public void onSuccess(Void result) {
 				runText.append("> Simulation is started successfully...\n");
 				console.setText(runText.toString());
-				timer.scheduleRepeating(1000);
-				serverTimer.scheduleRepeating(10000);
+				timer.scheduleRepeating(1000/cofactor);
+				serverTimer.scheduleRepeating(5000/cofactor);
 			}
 		});
 
@@ -212,8 +217,8 @@ public class SimulationConsole implements EntryPoint {
 				});
             	buttons.remove(resumeButton);
             	buttons.insert(pauseButton, 0);
-            	timer.scheduleRepeating(1000);
-            	serverTimer.scheduleRepeating(10000);
+            	timer.scheduleRepeating(1000/cofactor);
+            	serverTimer.scheduleRepeating(5000/cofactor);
             	stopButton.setEnabled(true);
             }
     	});
