@@ -162,7 +162,7 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 			if(se.getNodes().get(i).getId()==Integer.parseInt(id))
 				break;
 		se.getNodes().remove(i);
-		System.out.println("server: node deleted, node id: " + i);
+		System.out.println("SERVER: node deleted, node id: " + i);
 	}
 	
 	public String getOutputs() {
@@ -250,8 +250,6 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 	 */
 	@Override
 	public ArrayList<String> loadSimulation(String simulationName) {
-		//File file = new File(simulationName);
-		System.out.println(simulationName);
 		File file = new File("saved/" + simulationName);
 		TopologyParser tp = new TopologyParser();
 		tp.parseDocument(file);
@@ -264,7 +262,6 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		values.add(topology.getNodes().size()+"");
 		for(NodeObj node : topology.getNodes()) {
 			values.add(node.getId()+"");
-			//values.addAll(processNode(node));
 		}
 		return values;
 	}

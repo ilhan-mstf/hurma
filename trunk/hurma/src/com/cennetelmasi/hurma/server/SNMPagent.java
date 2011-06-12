@@ -108,4 +108,8 @@ public class SNMPagent extends Thread {
 		return stop;
 	}
 
+	public static ScheduledExecutorService getScheduler() {
+		return scheduler;
+	}
+
 }

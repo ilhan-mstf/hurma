@@ -22,7 +22,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 public class SimulationEngine {
@@ -32,7 +31,6 @@ public class SimulationEngine {
 	private SNMPagent timer;
 	private String simulationState = "ready";
 
-	
 	public SimulationEngine() {
 		setProtocol(new Protocol());
 	}
@@ -71,7 +69,6 @@ public class SimulationEngine {
 		agents.clear();
 		nodes.clear();
 	}
-	
 	
 	/**
 	 *  <duration></duration>
@@ -133,6 +130,7 @@ public class SimulationEngine {
         duration.setTextContent(simHour+":"+simMin+":"+simSec);
         simulationType.setTextContent(simType);
         
+        root.appendChild(simulationName);
         root.appendChild(duration);
         root.appendChild(simulationType);
         
@@ -253,6 +251,8 @@ public class SimulationEngine {
 	}
 
 	public String getSimulationState() {
+		if(timer.getScheduler().isShutdown())
+			simulationState = "finished";
 		return simulationState;
 	}
 	
