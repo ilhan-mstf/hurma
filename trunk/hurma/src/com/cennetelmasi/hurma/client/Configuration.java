@@ -6,6 +6,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -71,7 +72,10 @@ public class Configuration implements EntryPoint {
         
         simulationTypeLB.setVisibleItemCount(1);
         simulationTypeLB.addItem("Real Time");
-        simulationTypeLB.addItem("Reduced Time");
+        simulationTypeLB.addItem("2 x Reduced Time");
+        simulationTypeLB.addItem("4 x Reduced Time");
+        simulationTypeLB.addItem("8 x Reduced Time");
+        simulationTypeLB.addItem("16 x Reduced Time");
         
     	RootPanel.get("loginPage").setVisible(false);
     	RootPanel.get("clearButton").add(clearButton);
@@ -126,9 +130,13 @@ public class Configuration implements EntryPoint {
             	values.add(durationSecond.getText());
             	greetingService.saveSimulation(values, new AsyncCallback<Void>() {
 					@Override
-					public void onSuccess(Void result) {}
+					public void onSuccess(Void result) {
+						Window.alert("Succesfully saved.");
+					}
 					@Override
-					public void onFailure(Throwable caught) {}
+					public void onFailure(Throwable caught) {
+						Window.alert("Operation failed.");
+					}
 				});
             	System.out.println(RootPanel.get("networkTopology").getWidget(0).getTitle());
             	
