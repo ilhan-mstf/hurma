@@ -146,10 +146,37 @@ public class Protocol {
 		transport.close();
 	}
 
+	public String getIpAt(String base, int node){
+		String[] ips = base.split("\\.");
+		int[] ipsConverted = {0,0,0,0};
+		for(int i = 3; i >= 0; i--){
+			ipsConverted[i] = Integer.parseInt(ips[i]) + node;
+			if(ipsConverted[i] > 255){
+				node = ipsConverted[i] - 255;
+				ipsConverted[i] = 255;
+			} else {
+				node = 0;
+			}
+			
+		}
+		return ipsConverted[0]+"."+ipsConverted[1]+"."+ipsConverted[2]+"."+ipsConverted[3]+"";
+	}
+	
+	public String generateMacAddress(){
+		String[] macs = {"","","","","",""};
+		for(int i = 0; i<6; i++){
+			Random rand = new Random();
+			int a = rand.nextInt(255);
+			macs[i] = Integer.toHexString(a);
+		}
+		return macs[0]+":"+macs[1]+":"+macs[2]+":"+macs[3]+":"+macs[4]+":"+macs[5];
+	}
+	
 	public void sendSnmpV2Trap(Trap trap) throws IOException {
 		NodeObj node = trap.getNode();
 		Alarm alarm = node.getAlarms().get(trap.getAlarmId());
-
+		int numberOfDevices = node.getNumberOfDevices();
+		String nodeIp=node.getIp();
 		String trapOID = alarm.getOid().toString();
 		String description = alarm.getDescription();
 
@@ -179,8 +206,13 @@ public class Protocol {
 		snmp.send(pdu, comtarget);
 		count++;
 
+		Random rand = new Random();
+		
 		String str = node.getNodeName() + " - " + node.getId() + " : "
-				+ trap.getNode().getAlarms().get(trap.getAlarmId()).getName() + "\n";
+				+ trap.getNode().getAlarms().get(trap.getAlarmId()).getName() + 
+				" for the device " + getIpAt(node.getIp(), rand.nextInt(numberOfDevices))+ "\n";
+		
+		
 		log.append(str);
 		System.out.println("server: " + count + " " + alarm.getName() + " -- device " + node.getId()
 				+ " - Sending V2 Trap to " + ipAddress + " on Port " + port);
