@@ -108,7 +108,7 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		for(Alarm alarm : node.getAlarms()) {
 			for(Object requiredObject : alarm.getRequiredObjects()) {
 				MIBObject obj = node.getMibObjectByOid(requiredObject.toString());
-				if(!values.contains(obj.getName())){
+				if(!values.contains(obj.getName()) && obj.isSendable()){
 					values.add(obj.getName());
 					values.add(obj.getOid().toString());
 					values.add(obj.getValue());
