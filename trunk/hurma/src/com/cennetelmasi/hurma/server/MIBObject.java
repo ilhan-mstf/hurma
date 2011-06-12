@@ -6,15 +6,25 @@ public class MIBObject {
 	private String type;
 	private String value;
 	private String name;
+	private boolean isSendable;
 	
+	public boolean isSendable() {
+		return isSendable;
+	}
+
+	public void setSendable(boolean isSendable) {
+		this.isSendable = isSendable;
+	}
+
 	public MIBObject() {
+		isSendable = true;
 		oid = null;
 		description = null;
 		type = null;
 		value = null;
 	}
 	
-	public MIBObject(String oid, String description, String type, String value) {
+	public MIBObject(String oid, String description, String type, String value, boolean isIP) {
 		this.oid = oid;
 		this.description = description;
 		this.type = type;
@@ -67,5 +77,4 @@ public class MIBObject {
 	public void setValue(String value) {
 		this.value = value;
 	}
-
 }
