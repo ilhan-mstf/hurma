@@ -1,6 +1,5 @@
 package com.cennetelmasi.hurma.client;
 
-
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,7 +18,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class SimulationConsole implements EntryPoint {
 	private final GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
 	private Simulation simulation;
+	
 	private int cofactor;
+	int h = 0, m = 0, s = 0;
+	
 	final Button logoutButton 		= new Button("Logout");
     final Button pauseButton 		= new Button("Pause");
     final Button resumeButton 		= new Button("Resume");
@@ -49,7 +51,7 @@ public class SimulationConsole implements EntryPoint {
 		HorizontalPanel controlPanel = new HorizontalPanel();
 		final HorizontalPanel buttons = new HorizontalPanel();
 		VerticalPanel vPanel = new VerticalPanel();
-		DialogBox dialogBox = new DialogBox();
+		final DialogBox dialogBox = new DialogBox();
 		dialogBox.setText("Simulation outputs");
 		dialogBox.setAnimationEnabled(true);
 		dialogBox.setGlassEnabled(true);
@@ -107,33 +109,31 @@ public class SimulationConsole implements EntryPoint {
     	};
     	
     	final Timer timer = new Timer() {
-    		int hour = 0, min = 0, sec = 0;
-			
+    		
     		@Override
 			public void run() {
-    			
-    			sec++;
-    			if(sec >= 60){
-    				sec = 0;
-    				min++;
-    				if(min >= 60){
-    					min = 0;
-    					hour++;
+    			s++;
+    			if(s >= 60){
+    				s = 0;
+    				m++;
+    				if(m >= 60){
+    					m = 0;
+    					h++;
     				}
     			}
     			
     			durationText.delete(0, durationText.length());
-    			if(hour < 10)	durationText.append("0");
-    			durationText.append(hour + ":");
-    			if(min < 10)	durationText.append("0");
-    			durationText.append(min + ":");
-    			if(sec < 10)	durationText.append("0");
-    			durationText.append(sec);
+    			if(h < 10)	durationText.append("0");
+    			durationText.append(h + ":");
+    			if(m < 10)	durationText.append("0");
+    			durationText.append(m + ":");
+    			if(s < 10)	durationText.append("0");
+    			durationText.append(s);
     			passedTime.setText("Passed Time: " + durationText.toString());
     
-    			if(stringToInteger(simulation.getSimulationDurationHour()) <= hour 
-    			&& stringToInteger(simulation.getSimulationDurationMinute()) <= min 
-    			&& stringToInteger(simulation.getSimulationDurationSecond()) <= sec ) {
+    			if(stringToInteger(simulation.getSimulationDurationHour()) <= h 
+    			&& stringToInteger(simulation.getSimulationDurationMinute()) <= m 
+    			&& stringToInteger(simulation.getSimulationDurationSecond()) <= s ) {
     				this.cancel();
     				runText.append("> Simulation successfully ended.");
         			console.setText(runText.toString());
@@ -142,35 +142,77 @@ public class SimulationConsole implements EntryPoint {
     		}
     	};
     	
+    	/***********************
+		 * Continue simulation *
+		 ***********************/
+    	
+    	if(!simulation.getSimulationState().equals("ready")) {
+    		greetingService.getPassedTime(new AsyncCallback<Integer>() {
+
+				@Override
+				public void onFailure(Throwable caught) {
+					
+				}
+
+				@Override
+				public void onSuccess(Integer result) {
+					h = result / 3600;
+					m = (result-3600*h) / 60;
+					s = result-m*60;
+
+			    	if(simulation.getSimulationState().equals("running")) {
+			    		runText.append("> Simulation is continue...\n");
+						console.setText(runText.toString());
+						timer.scheduleRepeating(1000);
+						serverTimer.scheduleRepeating(10000);
+			    	} else if(simulation.getSimulationState().equals("paused")) {
+			    		runText.append("> Simulation is paused\n");
+			    		console.setText(runText.toString());
+			        	buttons.remove(pauseButton);
+			        	buttons.insert(resumeButton, 0);
+			        	stopButton.setEnabled(false);
+			    	}	    	
+				}
+			});
+    	} else {
+    		
     	/*********************
 		 * Start simulation	 *
 		 *********************/
     	
-        // Send simulation configuration to the server
-        simulation.createNodeValues(true, runText, console);
-    	
-        // Start simulation
-        int time = Integer.parseInt(simulation.getSimulationDurationHour())*60 +
-        		   Integer.parseInt(simulation.getSimulationDurationMinute())*60 +
-        		   Integer.parseInt(simulation.getSimulationDurationSecond());
-        
-        time /= cofactor;
-        greetingService.startSimulation(time, cofactor, new AsyncCallback<Void>() {
-
-			@Override
-			public void onFailure(Throwable caught) {
-				runText.append("> ERROR: Simulation is not started.\n");
-				console.setText(runText.toString());
-			}
-
-			@Override
-			public void onSuccess(Void result) {
-				runText.append("> Simulation is started successfully...\n");
-				console.setText(runText.toString());
+	        // Send simulation configuration to the server
+	        simulation.createNodeValues(true, runText, console);
+	    	
+	        // Start simulation
+	        int time = Integer.parseInt(simulation.getSimulationDurationHour())*60 +
+	        		   Integer.parseInt(simulation.getSimulationDurationMinute())*60 +
+	        		   Integer.parseInt(simulation.getSimulationDurationSecond());
+	        
+	        greetingService.startSimulation(time, cofactor, new AsyncCallback<Void>() {
+	
+				@Override
+				public void onFailure(Throwable caught) {
+					runText.append("> ERROR: Simulation is not started.\n");
+					console.setText(runText.toString());
+				}
+	
+				@Override
+				public void onSuccess(Void result) {
+					runText.append("> Simulation is started successfully...\n");
+					console.setText(runText.toString());
 				timer.scheduleRepeating(1000/cofactor);
 				serverTimer.scheduleRepeating(1000/cofactor);
-			}
-		});
+				}
+			});
+    	}
+    	
+    	System.out.println("AAAAAAAAAAAAAAAAAAAAAA"+simulation.getSimulationDurationMinute());
+    	
+    	str = simulation.getSimulationDurationHour() + ":" +
+			  simulation.getSimulationDurationMinute() + ":" +
+			  simulation.getSimulationDurationSecond();
+		simulationDuration.setText("Simulation duration: " + str);
+		passedTime.setText("Passed Time: " + durationText);
 
 		/********************
 		 * BUTTON Handlers  *
@@ -247,6 +289,16 @@ public class SimulationConsole implements EntryPoint {
                 stopButton.setEnabled(false);
             }
     	});
+    	
+    	logoutButton.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				timer.cancel();
+				serverTimer.cancel();
+				dialogBox.hide();
+			}
+		});
 	
 	}
 	

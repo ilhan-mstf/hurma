@@ -17,6 +17,7 @@ public class Simulation {
 	private String simulationDurationMinute;
 	private String simulationDurationSecond;
 	private int simulationType;
+	private String simulationState;
 	private ArrayList<Node> nodeList = new ArrayList<Node>();
 	
 	private ArrayList<String> values;
@@ -180,6 +181,14 @@ public class Simulation {
 
 	public void setNodeList(ArrayList<Node> nodeList) {
 		this.nodeList = nodeList;
+	}
+
+	public void setSimulationState(String simulationState) {
+		this.simulationState = simulationState;
+	}
+
+	public String getSimulationState() {
+		return simulationState;
 	}
 
 }

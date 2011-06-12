@@ -30,4 +30,6 @@ public interface GreetingServiceAsync {
 	void createNode(String mib, AsyncCallback<ArrayList<String>> callback);
 	void getNodeObjValuesById(String id,
 			AsyncCallback<ArrayList<String>> callback);
+	void getSimulationState(AsyncCallback<String> callback);
+	void getPassedTime(AsyncCallback<Integer> callback);
 }
