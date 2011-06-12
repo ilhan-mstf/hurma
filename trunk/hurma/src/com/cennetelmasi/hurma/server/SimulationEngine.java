@@ -30,12 +30,15 @@ public class SimulationEngine {
 	private ArrayList<NodeObj> nodes = new ArrayList<NodeObj>();
 	private Protocol protocol;
 	private SNMPagent timer;
+	private String simulationState = "ready";
+
 	
 	public SimulationEngine() {
 		setProtocol(new Protocol());
 	}
 	
 	public void start(int time, int cofactor) {
+		setSimulationState("running");
 		for(NodeObj node : nodes) {
 			SNMPagent agent = new SNMPagent("NODE", getProtocol(), node);
 			agents.add(agent);
@@ -47,14 +50,17 @@ public class SimulationEngine {
 	}
 	
 	public void pause() {
+		setSimulationState("paused");
 		timer.pauseScheduler();
 	}
 	
 	public void resume() {
+		setSimulationState("running");
 		timer.resumeScheduler();
 	}
 	
 	public void stop() {
+		setSimulationState("ready");
 		timer.pauseScheduler();
 		timer.setStop(true);
 		for(SNMPagent agent : agents)
@@ -119,14 +125,13 @@ public class SimulationEngine {
         
         Element	root = doc.getDocumentElement();
         
+        Element simulationName = doc.createElement("simulationName");
         Element duration = doc.createElement("duration");
         Element simulationType  = doc.createElement("simulationType");
         
-        Text durationText = doc.createTextNode(simHour+":"+simMin+":"+simSec);
-        Text simulationTypeText	 = doc.createTextNode(simType);
-        
-        duration.appendChild(durationText);
-        simulationType.appendChild(simulationTypeText);
+        simulationName.setTextContent(simName);
+        duration.setTextContent(simHour+":"+simMin+":"+simSec);
+        simulationType.setTextContent(simType);
         
         root.appendChild(duration);
         root.appendChild(simulationType);
@@ -177,8 +182,8 @@ public class SimulationEngine {
 			
 			for(MIBObject obj : n.getMibObjects()){
 				//if(reqObjOids.contains(se.getNodes().get(i).getMibObjects().get(j).getOid())){
-					//Å�u anda bÃ¼tÃ¼n deÄŸerleri alÄ±yor, yukarÄ±daki satÄ±rdaki comment kaldÄ±rÄ±lÄ±rsa
-					//bu sefer de sadece seÃ§ili alarmlara gereken objeleri alacak, bu halini seÃ§tim pikaÃ§u!..
+					//Şu anda bütün değerleri alıyor, yukarıdaki satırdaki comment kaldırılırsa
+					//bu sefer de sadece seçili alarmlara gereken objeleri alacak, bu halini seçtim pikaçu!..
 					Element field = doc.createElement("field");
 					field.setAttribute("oid", obj.getOid());
 					field.setAttribute("name", obj.getName());
@@ -241,6 +246,14 @@ public class SimulationEngine {
 	
 	public Protocol getProtocol() {
 		return protocol;
+	}
+
+	public void setSimulationState(String simulationState) {
+		this.simulationState = simulationState;
+	}
+
+	public String getSimulationState() {
+		return simulationState;
 	}
 	
 }

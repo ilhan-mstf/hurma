@@ -100,6 +100,8 @@ public class TopologyParser extends DefaultHandler{
 			node.setIp(tempVal);
 		} else if (qName.equalsIgnoreCase("image")) {
 			node.setImage(tempVal);
+		} else if (qName.equalsIgnoreCase("simulationName")) {
+			node.setNodeName(tempVal);
 		}
 	}
 
