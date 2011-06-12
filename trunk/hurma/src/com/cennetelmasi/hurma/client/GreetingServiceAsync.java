@@ -10,7 +10,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public interface GreetingServiceAsync {
     void greetServer(String input, String pass, AsyncCallback<String> callback);
     void getNodeTypes(AsyncCallback<ArrayList<String>> callback);
-    void getNodeObjValues(String mib, AsyncCallback<ArrayList<String>> callback);
     void setNodeObjValues(ArrayList<String> values,
 			ArrayList<String> selectedAlarms, ArrayList<String> requiredFields,
 			AsyncCallback<Void> callback);
@@ -26,5 +25,9 @@ public interface GreetingServiceAsync {
 	void saveSimulation(ArrayList<String> values, AsyncCallback<Void> callback);
 	void getSavedSimulationName(AsyncCallback<ArrayList<String>> callback);
 	void loadSimulation(String simulationName,
+			AsyncCallback<ArrayList<String>> callback);
+	void clear(AsyncCallback<Void> callback);
+	void createNode(String mib, AsyncCallback<ArrayList<String>> callback);
+	void getNodeObjValuesById(String id,
 			AsyncCallback<ArrayList<String>> callback);
 }

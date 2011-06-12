@@ -23,6 +23,17 @@ public class Simulation {
 	private ArrayList<String> selectedAlarms;
 	private ArrayList<String> requiredFields;
 	
+	/**
+	 * values Format
+	 * id, nodeName, numberOfDevices, ip
+	 * 
+	 * selectedAlarms Format
+	 * (oid, prob, frequency), ...
+	 * 
+	 * requiredFields
+	 * (oid, value), ...
+	 */
+	
 	public Simulation() {
 		simulationName ="";
 		simulationId ="";
@@ -40,20 +51,23 @@ public class Simulation {
         		// Values
         		values = new ArrayList<String>();
         		values.add(Integer.toString(n.getNodeId()));
-        		values.add(Integer.toString(n.getNumberOfDevice()));
-        		values.add(Float.toString(n.getProb()));
         		values.add(n.getNodeTypeName());
+        		values.add(n.getNumberOfDevices().getValue());
+        		values.add(n.getIp().getValue());
+        		values.add(n.getImage());
         		// Alarms
         		selectedAlarms = new ArrayList<String>();
-        		for(int j=0; j<n.getCheckBoxList().size(); j++) {
-        			CheckBox cb = n.getCheckBoxList().get(j);
+        		for(int j=0; j<n.getAlarmList().size(); j++) {
+        			CheckBox cb = n.getAlarmList().get(j);
         			if(cb.getValue()) {
         				selectedAlarms.add(cb.getElement().getId());
+        				selectedAlarms.add(n.getProbList().get(j).getValue());
+        				selectedAlarms.add(n.getFrequencyList().get(j).getSelectedIndex()+"");
         			}
         		}
         		// Required fields
         		requiredFields = new ArrayList<String>();
-        		for(int j=4; j<n.getPropertyList().size(); j++) {
+        		for(int j=0; j<n.getPropertyList().size(); j++) {
         			TextBox tb = n.getPropertyList().get(j);
         			requiredFields.add(tb.getElement().getId());
         			requiredFields.add(tb.getValue());
@@ -107,19 +121,23 @@ public class Simulation {
 					}
 				});
 	}
+	
 
 	public String getSimulationName() {
 		return simulationName;
 	}
 
+	
 	public void setSimulationName(String simulationName) {
 		this.simulationName = simulationName;
 	}
 
+	
 	public String getSimulationId() {
 		return simulationId;
 	}
 
+	
 	public void setSimulationId(String simulationId) {
 		this.simulationId = simulationId;
 	}

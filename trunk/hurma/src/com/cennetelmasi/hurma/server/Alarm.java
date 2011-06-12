@@ -7,7 +7,9 @@ public class Alarm {
 	private String description;
 	private String name;
 	private ArrayList<Object> requiredObjects;
-	private boolean selected;
+	private boolean selected = false;
+	private float prob;
+	private int freq;
 
 	public Alarm() {
 		oid = null;
@@ -67,6 +69,24 @@ public class Alarm {
 				return requiredObjects.get(i);
 		}
 		return null;
+	}
+
+	public void setProb(float prob) {
+		this.prob = prob;
+	}
+
+	public float getProb() {
+		return prob;
+	}
+
+	
+	public void setFreq(int freq) {
+		this.freq = freq;
+	}
+
+	
+	public int getFreq() {
+		return freq;
 	}
 
 }

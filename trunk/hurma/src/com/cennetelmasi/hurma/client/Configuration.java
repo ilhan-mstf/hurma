@@ -42,7 +42,6 @@ public class Configuration implements EntryPoint {
 			@Override
 			public void onFailure(Throwable caught) {
 				// TODO Show the RPC error message to the user
-				
 			}
 
 			@Override
@@ -152,21 +151,7 @@ public class Configuration implements EntryPoint {
     	
     	loadButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-            	greetingService.loadSimulation("", new AsyncCallback<ArrayList<String>>() {
-					
-					@Override
-					public void onSuccess(ArrayList<String> result) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
-						
-					}
-				});
-            	
+            	RootPanel.get("rpcLoad").setVisible(true);
             	final DialogBox dialogBox = new DialogBox();
             	dialogBox.setAnimationEnabled(true);
             	dialogBox.setGlassEnabled(true);
@@ -175,19 +160,22 @@ public class Configuration implements EntryPoint {
                 final ListBox fileListBox = new ListBox(false);
                 fileListBox.setVisibleItemCount(5);
                 
-                /**
-                 * Following items are temporary
-                 * that is, in real system, we will get file names 
-                 * from a  specific directory
-                 */
-                
-                fileListBox.addItem("Simulation_27.11.2010.xml");
-                fileListBox.addItem("Simulation_03.12.2010.xml");
-                fileListBox.addItem("Simulation_12.12.2010.xml");
-                fileListBox.addItem("Simulation_13.12.2010.xml");
-                fileListBox.addItem("Simulation_01.01.2011.xml");
-                fileListBox.addItem("Simulation_04.01.2011.xml");
-                fileListBox.addItem("Simulation_21.01.2011.xml");
+                greetingService.getSavedSimulationName(new AsyncCallback<ArrayList<String>>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+		            	RootPanel.get("rpcLoad").setVisible(false);
+		            	RootPanel.get("rpcError").setVisible(true);
+					}
+
+					@Override
+					public void onSuccess(ArrayList<String> result) {
+						for(int i=0; i<result.size(); i++)
+							fileListBox.addItem(result.get(i));
+						RootPanel.get("rpcLoad").setVisible(false);
+						dialogBox.center();
+					}
+				});
                 
                 dialogBox.setText("Please select a file to load");
                 dialogBox.setAnimationEnabled(true);
@@ -200,15 +188,42 @@ public class Configuration implements EntryPoint {
                 dialogVPanel.add(closeButton);
                 
                 dialogBox.setWidget(dialogVPanel);
-                dialogBox.center();
                 
                 closeButton.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
                     	// Add a function to handle the events after loading the file
-                    	dialogBox.removeFromParent();
+                    	dialogBox.hide();
+                    	greetingService.loadSimulation("simulation.xml", new AsyncCallback<ArrayList<String>>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								RootPanel.get("rpcLoad").setVisible(false);
+				            	RootPanel.get("rpcError").setVisible(true);
+							}
+
+							@Override
+							public void onSuccess(ArrayList<String> result) {
+								//for(String str : result) System.out.println(str);
+								/**
+								 * result format:
+								 * name, simulationType, duration, numberOfNode, 
+								 * (nodeId), ...
+								 */
+								simulation.setSimulationName(result.get(0));
+								simulation.setSimulationType(result.get(1));
+								String[] duration = result.get(2).split(":");
+								simulation.setSimulationDurationHour(duration[0]);
+								simulation.setSimulationDurationMinute(duration[1]);
+								simulation.setSimulationDurationSecond(duration[2]);
+								int size = Integer.parseInt(result.get(3));
+								for(int i=0; i<size; i++) {
+									Node n = new Node(Integer.parseInt(result.get(i+4)));
+									n.onModuleLoad();
+								}
+							}
+						});
                     }
-                });   
-                
+                });    
             }
 		});
         
@@ -219,6 +234,21 @@ public class Configuration implements EntryPoint {
                 durationSecond.setText("00");
                 nameTextField.setText("");
                 RootPanel.get("networkTopology").clear();
+                simulation.getNodeList().clear();
+                greetingService.clear(new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void onSuccess(Void result) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
             }
 		});
             

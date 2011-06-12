@@ -50,12 +50,13 @@ public class Protocol {
 				e.printStackTrace();
 			}
 			// decide to send trap or not
-			if (probCal(node.getProbability())) {
+			// TODO probability
+			//if (probCal(node.getProbability())) {
 				System.out.println("server: device " + node.getId() + "- trap");
 				// select alarm
 				// add to queue
 				alarmQueue.add(new Trap(node, 0));
-			}
+			//}
 		}
 	}
 

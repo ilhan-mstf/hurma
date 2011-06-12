@@ -1,31 +1,11 @@
 package com.cennetelmasi.hurma.server;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.StringWriter;
 import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Text;
-import org.xml.sax.SAXException;
 
 import net.percederberg.mibble.MibLoaderException;
 
@@ -40,11 +20,10 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implements
                 GreetingService {
 	
+	private HttpSession session;
 	private SimulationEngine se = new SimulationEngine();
 	int id = 0;
 	
-	private HttpSession session;
-
     public String greetServer(String input, String pass) {
     	input = escapeHtml(input);
         if(input.equals("Hurma") && pass.equals("hurma"))
@@ -54,9 +33,8 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
     }
     
     private String escapeHtml(String html) {
-		if (html == null) {
+		if (html == null)
 			return null;
-		}
 		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
 				.replaceAll(">", "&gt;");
 	}
@@ -78,17 +56,11 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 			values.add(nodeType.getMIB());
 			values.add(nodeType.getIcon());
 		}
-		System.out.println("server: xml is parsed.");
+		System.out.println("SERVER: xml is parsed.");
 		return values;
     }
     
-    
-    /**
-     * Return format:
-     * id, numberofAlarms, (AlarmName, AlarmOID), ... (ObjectName, ObjectOID) ...
-     */
-    public ArrayList<String> getNodeObjValues(String mib) {
-		ArrayList<String> values = new ArrayList<String>();
+    public ArrayList<String> createNode(String mib) {
     	NodeObj node = null;
 		try {
 			node = new NodeObj(mib);
@@ -97,65 +69,89 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		} catch (MibLoaderException e) {
 			e.printStackTrace();
 		}
-    	// Set id
-    	values.add(Integer.toString(id));
-    	// Add alarm size
-    	values.add(Integer.toString(node.getAlarms().size()));
-    	// Add alarms
-    	for(Alarm alarm : node.getAlarms()) {
-    		values.add(alarm.getName());
-    		values.add(alarm.getOid());
-    	}
-    	// Add required objects
-    	for(Alarm alarm : node.getAlarms()) {
-    		for(Object requiredObject : alarm.getRequiredObjects()) {
-    			MIBObject obj = new MIBObject();
-				obj = node.getMibObjectByOid(requiredObject.toString());
+		
+    	se.getNodes().add(node);
+    	node.setId(id);
+    	System.out.println("SERVER: node created, node id: " + id);
+    	id++;
+    	return processNode(node);
+    }
+    
+    public ArrayList<String> getNodeObjValuesById(String id) {
+    	for(NodeObj n : se.getNodes())
+    		if(n.getId() == Integer.parseInt(id))
+    			return processNode(n);
+    	return null;
+    }
+    
+    /**
+     * Return format:
+     * id, nodeName, numberOfDevices, ip, image
+     * numberofAlarms, (AlarmName, AlarmOID, AlarmProb, AlarmFreq, isSelected), ... 
+     * (ObjectName, ObjectOID, ObjectValue), ...
+     */
+	public ArrayList<String> processNode(NodeObj node) {
+		ArrayList<String> values = new ArrayList<String>();
+		values.add(node.getId()+"");
+		values.add(node.getNodeName());
+		values.add(node.getNumberOfDevices()+"");
+		values.add(node.getIp());
+		values.add(node.getImage());
+		values.add(node.getAlarms().size()+"");
+		for(Alarm alarm : node.getAlarms()) {
+			values.add(alarm.getName());
+			values.add(alarm.getOid());
+			values.add(alarm.isSelected()+"");
+			values.add(Float.toString(alarm.getProb()));
+			values.add(alarm.getFreq()+"");
+		}
+		for(Alarm alarm : node.getAlarms()) {
+			for(Object requiredObject : alarm.getRequiredObjects()) {
+				MIBObject obj = node.getMibObjectByOid(requiredObject.toString());
 				if(!values.contains(obj.getName())){
 					values.add(obj.getName());
 					values.add(obj.getOid().toString());
+					values.add(obj.getValue());
 				}
-    		}
-    	}
-    	se.getNodes().add(node);
-    	node.setId(id);
-    	System.out.println("server: node created, node id: " + id);
-    	id++;
-    	return values;
-    }
-
+			}
+		}
+		System.out.println("SERVER: node processed, node id: " + node.getId());
+		return values;
+	}
+    
     /**
-     * Argument formats
-     * values : id, numberOfDevices, prob
-     * selectedAlarms : oid, ...
-     * requiredFields : (oid, value) ... 
+     * Argument format:
+     * values: id, nodeName, numberOfDevices, ip, image
+     * selectedAlarms: (oid, probability, frequency), ...
+     * requiredFields: (oid, value), ... 
      */
 	public void setNodeObjValues(ArrayList<String> values,
 			ArrayList<String> selectedAlarms, ArrayList<String> requiredFields) {
+		
+		//System.out.println("values size: " + values.size() + ", selectedAlarms size: " + selectedAlarms.size() + ", requiredFields size: " + requiredFields.size());
+		
 		for(NodeObj n : se.getNodes()) {
 			if(n.getId() == Integer.parseInt(values.get(0))) {
-				System.out.println(n.getId());
 				// Set values
-				n.setNumberOfDevices(Integer.parseInt(values.get(1)));
-				n.setProbability(Float.parseFloat(values.get(2)));
-				n.setNodeName(values.get(3));
-				System.out.println("server: " + values.get(3));
+				n.setNodeName(values.get(1));
+				n.setNumberOfDevices(Integer.parseInt(values.get(2)));
+				n.setIp(values.get(3));
+				n.setImage(values.get(4));
 				// Rearrange alarm list
-				ArrayList<Alarm> temp = new ArrayList<Alarm>();
-				for(Alarm a : n.getAlarms())
-					if(selectedAlarms.contains(a.getOid()))
-						temp.add(a);
-				n.setAlarms(temp);
+				int size = selectedAlarms.size();
+				for(int i=0; i<size;) {
+					Alarm alarm = n.getAlarmByOid(selectedAlarms.get(i++));
+					alarm.setProb(Float.parseFloat(selectedAlarms.get(i++)));
+					alarm.setFreq(Integer.parseInt(selectedAlarms.get(i++)));
+					alarm.setSelectStatus(true);
+				}
 				// Set MIBObject values
-				int size = requiredFields.size();
+				size = requiredFields.size();
 				for(int i=0; i<size; i++) {
-					System.out.println(requiredFields.get(i));
-					MIBObject obj = n.getMibObjectByOid(requiredFields.get(i));
-					if(obj==null) System.out.println("obje null");
-					i++;
+					MIBObject obj = n.getMibObjectByOid(requiredFields.get(i++));
 					obj.setValue(requiredFields.get(i));
 				}
-				System.out.println("server: SNMP Agent is created, node id: " + n.getId());
+				System.out.println("SERVER: node values are set, node id: " + n.getId());
 			}
 		}
 	}
@@ -168,7 +164,7 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		se.getNodes().remove(--i);
 		System.out.println("server: node deleted, node id: " + i);
 	}
-
+	
 	public String getOutputs() {
 		String str = se.getProtocol().getLog().toString();
 		se.getProtocol().setLog(new StringBuffer());
@@ -199,23 +195,21 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		HttpServletRequest request = this.getThreadLocalRequest();
     	session = request.getSession();
 		
-		if (session.getAttribute("id") == null) {
+		if (session.getAttribute("id") == null)
     		return false;
-    	} else {
+    	else
     		return true;
-    	}
 	}
-
+	
 	@Override
 	public void destroySession() {
 		session.removeAttribute("id");
 	}
-
+	
 	@Override
 	public void createSession() {
-		if (session.getAttribute("id") == null) {
+		if (session.getAttribute("id") == null)
     		session.setAttribute("id", "user");
-    	}
 	}
 	
 	/**
@@ -228,188 +222,56 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 	 */
 	@Override
 	public void saveSimulation(ArrayList<String> values) {
-		String simName = values.get(0);
-		String simType = values.get(1);
-		String simHour = values.get(2);
-		String simMin  = values.get(3);
-		String simSec  = values.get(4);
-		File file = new File(simName+".xml");
-		FileWriter writer = null;
-		try {
-			writer = new FileWriter(file);
-			writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><networkTopologies></networkTopologies>");
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-				
-		DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder;
-        Document doc = null;
-        try {
-			docBuilder = dbfac.newDocumentBuilder();
-			doc = docBuilder.parse(file);
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-        
-        Element	root = doc.getDocumentElement();
-          
-        
-        Element duration = doc.createElement("duration");
-        Element simulationType  = doc.createElement("simulationType");
-        
-        Text durationText = doc.createTextNode(simHour+":"+simMin+":"+simSec);
-        Text simulationTypeText	 = doc.createTextNode(simType);
-        
-        duration.appendChild(durationText);
-        simulationType.appendChild(simulationTypeText);
-        
-        root.appendChild(duration);
-        root.appendChild(simulationType);
-        
-        Element topology = doc.createElement("networkTopology");
-        for(int i = 0; i < se.getNodes().size(); i++){
-			int number 	= se.getNodes().get(i).getNumberOfDevices();
-			float error	= se.getNodes().get(i).getProbability();
-			Element node = doc.createElement("node");
-			Element nodeId = doc.createElement("id");
-			Element nodeName = doc.createElement("name");
-			Element nodeType = doc.createElement("nodeType");
-			Element trapRate = doc.createElement("trapRate");
-			Element numberOfDevices = doc.createElement("numberOfDevices");
-			Element alarms = doc.createElement("alarms");
-			Element fields = doc.createElement("fields");
-			Element mib = doc.createElement("mib");
-			
-			mib.setTextContent(se.getNodes().get(i).getMIB());
-			nodeId.setTextContent(Integer.toString(se.getNodes().get(i).getId()));
-			nodeName.setTextContent(se.getNodes().get(i).getNodeName());
-			nodeType.setTextContent(se.getNodes().get(i).getNodeTypeName());
-			trapRate.setTextContent(Float.toString(error));
-			numberOfDevices.setTextContent(Integer.toString(number));
-			node.appendChild(nodeId);
-			node.appendChild(nodeName);
-			node.appendChild(mib);
-			node.appendChild(nodeType);
-			node.appendChild(trapRate);
-			node.appendChild(numberOfDevices);
-			node.appendChild(alarms);
-			node.appendChild(fields);
-			ArrayList<String> reqObjOids = new ArrayList<String>();
-			for(int j = 0; j < se.getNodes().get(i).getAlarms().size(); j++){
-				Element alarm = doc.createElement("alarm");
-				alarm.setAttribute("oid", se.getNodes().get(i).getAlarms().get(j).getOid());
-				alarm.setTextContent(se.getNodes().get(i).getAlarms().get(j).getName());
-				alarms.appendChild(alarm);
-				for(int k = 0; k < se.getNodes().get(i).getAlarms().get(j).getRequiredObjects().size(); k++){
-					if(!reqObjOids.contains(se.getNodes().get(i).getAlarms().get(j).getRequiredObjects().get(k)))
-						reqObjOids.add(se.getNodes().get(i).getAlarms().get(j).getRequiredObjects().get(k).toString());
-				}
-			}
-			
-			for(int j = 0; j < se.getNodes().get(i).getMibObjects().size(); j++){
-				//if(reqObjOids.contains(se.getNodes().get(i).getMibObjects().get(j).getOid())){
-					//˛u anda b¸t¸n deerleri al˝yor, yukar˝daki sat˝rdaki comment kald˝r˝l˝rsa
-					//bu sefer de sadece seÁili alarmlara gereken objeleri alacak, bu halini seÁtim pikaÁu!..
-					Element field = doc.createElement("field");
-					field.setAttribute("oid", se.getNodes().get(i).getMibObjects().get(j).getOid());
-					field.setAttribute("name",se.getNodes().get(i).getMibObjects().get(j).getName());
-					field.setTextContent(se.getNodes().get(i).getMibObjects().get(j).getValue());
-					fields.appendChild(field);
-				//}
-			}
-			
-			topology.appendChild(node);
-        }
-        
-        root.appendChild(topology);
-        
-        TransformerFactory transfac = TransformerFactory.newInstance();
-		Transformer trans = null;
-		try {
-			trans = transfac.newTransformer();
-		} catch (TransformerConfigurationException e) {
-			e.printStackTrace();
-		}
-		trans.setOutputProperty(OutputKeys.INDENT, "yes");
-
-		StringWriter sw = new StringWriter();
-	    StreamResult result = new StreamResult(sw);
-	    DOMSource source = new DOMSource(doc);
-	    try {
-			trans.transform(source, result);
-		} catch (TransformerException e2) {
-			e2.printStackTrace();
-		}
-	    String xmlString = sw.toString();
-	 
-	    OutputStream f0 = null;
-	    byte buf[] = xmlString.getBytes();
-	    try {
-			f0 = new FileOutputStream(file);
-			for(int i=0;i<buf .length;i++) {
-				f0.write(buf[i]); 
-			}
-			f0.close();
-			buf = null;
-	    } catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (IOException e) {
-			   e.printStackTrace();
-		   }
-	      
+		se.save(values);
+		System.out.println("SERVER: saved");
 	}
-	/*	
-	 * <duration></duration>
-		<simulationType></simulationType>
-		<networkTopology>
-			<node>
-				<id></id>
-				<name></name>
-				<nodeTypeId></nodeTypeId>
-				<trapRate></trapRate>
-				<alarm>
-				<id></id>
-				<name></name>
-				<field></field>
-				<value></value>
-				</alarm>
-				...
-				<ip></ip>
-				<numberOfDevices></numberOfDevices>
-			</node>
-		</networkTopology>
-	 * 
-	 * */
+	
 	/**
 	 * Return format:
 	 * name of saved simulation names
 	 */
-
 	@Override
 	public ArrayList<String> getSavedSimulationName() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<String> names = new ArrayList<String>();
+		names.add("Simulation_27.11.2010.xml");
+		names.add("Simulation_03.12.2010.xml");
+		names.add("Simulation_12.12.2010.xml");
+		names.add("Simulation_13.12.2010.xml");
+		names.add("Simulation_01.01.2011.xml");
+		names.add("Simulation_04.01.2011.xml");
+		names.add("Simulation_21.01.2011.xml");
+		return names;
 	}
 
 	/**
 	 * Return format:
-	 * bunu beraber konu≈üup karar verelim...
-	 * √ß√ºnk√º g√∂ndermesi geren √ßok ≈üey var..
+	 * name, simulationType, duration, numberOfNode, 
+	 * (nodeId), ...
 	 */
 	@Override
 	public ArrayList<String> loadSimulation(String simulationName) {
-		// TODO Auto-generated method stub
-		File file = new File(simulationName);
-		TopologyParser ntp = new TopologyParser();
-		ntp.parseDocument(file);
-		TopologyObject topology = TopologyParser.nodeTypes.get(0);
-		return null;
+		//File file = new File(simulationName);
+		File file = new File("saved/hede.xml");
+		TopologyParser tp = new TopologyParser();
+		tp.parseDocument(file);
+		TopologyObject topology = TopologyParser.getTopology();		
+		se.setNodes(topology.getNodes());
+		ArrayList<String> values = new ArrayList<String>();
+		values.add(topology.getName());
+		values.add(topology.getSimulationType());
+		values.add(topology.getDuration());
+		values.add(topology.getNodes().size()+"");
+		for(NodeObj node : topology.getNodes()) {
+			values.add(node.getId()+"");
+			//values.addAll(processNode(node));
+		}
+		return values;
+	}
+
+	@Override
+	public void clear() {
+		se.clear();
 	}
 
 }
+

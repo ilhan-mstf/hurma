@@ -29,25 +29,33 @@ public class TopologyObject {
 	public String getDuration() {
 		return duration;
 	}
+	
 	public void setDuration(String duration) {
 		this.duration = duration;
 	}
+	
 	public String getSimulationType() {
 		return simulationType;
 	}
+	
 	public void setSimulationType(String simulationType) {
 		this.simulationType = simulationType;
 	}
+	
 	public String getName() {
 		return name;
 	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 	public ArrayList<NodeObj> getNodes() {
 		return nodes;
 	}
+	
 	public void setNodes(ArrayList<NodeObj> nodes) {
 		this.nodes = nodes;
 	}
+
 }
