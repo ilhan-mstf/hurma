@@ -14,7 +14,7 @@ public interface GreetingServiceAsync {
 			ArrayList<String> selectedAlarms, ArrayList<String> requiredFields,
 			AsyncCallback<Void> callback);
 	void deleteNodeObj(String id, AsyncCallback<Void> callback);
-	void startSimulation(int time, AsyncCallback<Void> callback);
+	void startSimulation(int time, int cofactor, AsyncCallback<Void> callback);
 	void getOutputs(AsyncCallback<String> callback);
 	void pause(AsyncCallback<String> callback);
 	void resume(AsyncCallback<Void> callback);

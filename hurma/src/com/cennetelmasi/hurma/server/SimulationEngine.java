@@ -35,13 +35,13 @@ public class SimulationEngine {
 		setProtocol(new Protocol());
 	}
 	
-	public void start(int time) {
+	public void start(int time, int cofactor) {
 		for(NodeObj node : nodes) {
 			SNMPagent agent = new SNMPagent("NODE", getProtocol(), node);
 			agents.add(agent);
 			agent.start();
 		}
-		timer = new SNMPagent("TIMER", getProtocol(), time);
+		timer = new SNMPagent("TIMER", getProtocol(), time, cofactor);
 		timer.start();
 		System.out.println("SERVER: threads are created.");
 	}
@@ -177,8 +177,8 @@ public class SimulationEngine {
 			
 			for(MIBObject obj : n.getMibObjects()){
 				//if(reqObjOids.contains(se.getNodes().get(i).getMibObjects().get(j).getOid())){
-					//Şu anda bütün değerleri alıyor, yukarıdaki satırdaki comment kaldırılırsa
-					//bu sefer de sadece seçili alarmlara gereken objeleri alacak, bu halini seçtim pikaçu!..
+					//Å�u anda bÃ¼tÃ¼n deÄŸerleri alÄ±yor, yukarÄ±daki satÄ±rdaki comment kaldÄ±rÄ±lÄ±rsa
+					//bu sefer de sadece seÃ§ili alarmlara gereken objeleri alacak, bu halini seÃ§tim pikaÃ§u!..
 					Element field = doc.createElement("field");
 					field.setAttribute("oid", obj.getOid());
 					field.setAttribute("name", obj.getName());

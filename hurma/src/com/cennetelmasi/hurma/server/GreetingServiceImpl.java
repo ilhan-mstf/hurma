@@ -171,9 +171,9 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 		return str;
 	}
 
-	public void startSimulation(int time) {
+	public void startSimulation(int time, int cofactor) {
 		System.out.println("server: simulation started.");
-		se.start(time);
+		se.start(time, cofactor);
 	}
 
 	public String pause() {
