@@ -4,32 +4,33 @@
     "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
-  
-  <!-- Servlets -->
-  <servlet>
-    <servlet-name>greetServlet</servlet-name>
-    <servlet-class>com.cennetelmasi.hurma.server.GreetingServiceImpl</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>greetServlet</servlet-name>
-    <url-pattern>/hurma/greet</url-pattern>
-  </servlet-mapping>
-  <servlet>
-  <servlet-name>myFormHandler</servlet-name>
-  <servlet-class>com.cennetelmasi.hurma.server.MyFormHandler</servlet-class>
-</servlet>
-<servlet-mapping>
-  <servlet-name>myFormHandler</servlet-name>
-  <url-pattern>/hurma/myFormHandler</url-pattern>
-</servlet-mapping>
-  <!-- Default page to serve -->
-  <welcome-file-list>
-    <welcome-file>Hurma.html</welcome-file>
-  </welcome-file-list>
+
+	<!-- Servlets -->
+	<servlet>
+		<servlet-name>greetServlet</servlet-name>
+		<servlet-class>com.cennetelmasi.hurma.server.GreetingServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>greetServlet</servlet-name>
+		<url-pattern>/hurma/greet</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>myFormHandler</servlet-name>
+		<servlet-class>com.cennetelmasi.hurma.server.MyFormHandler</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>myFormHandler</servlet-name>
+		<url-pattern>/hurma/myFormHandler</url-pattern>
+	</servlet-mapping>
+	<!-- Default page to serve -->
+	<welcome-file-list>
+		<welcome-file>Hurma.html</welcome-file>
+	</welcome-file-list>
 	<module>
-		<inherits name="com.google.gwt.user.User"/>
-		<entry-point class="com.cennetelmasi.hurma.client.NewDevice"/>
+		<inherits name="com.google.gwt.user.User" />
+		<entry-point class="com.cennetelmasi.hurma.client.NewDevice" />
 		<servlet path="/upload"
-				class="com.cennetelmasi.hurma.server.FileUploadServlet"/>
+			class="com.cennetelmasi.hurma.server.FileUploadServlet" />
 	</module>
+
 </web-app>
