@@ -20,6 +20,9 @@ public class NodeObj {
 	private int id;
 	private int numberOfDevices;
 	private String ip;
+	private String mac;
+	private MIBObject ipObject;
+	private MIBObject macObject;
 	private String nodeName;
 	private String image;
 	
@@ -35,6 +38,8 @@ public class NodeObj {
 	
 	public NodeObj(String MIB) throws IOException, MibLoaderException {
 		this.MIB = new String(MIB);
+		this.ipObject = new MIBObject();
+		this.macObject = new MIBObject();
 		this.mibObjects = new ArrayList<MIBObject>();
 		this.alarms = new ArrayList<Alarm>();
 		parseMIB();
@@ -102,12 +107,21 @@ public class NodeObj {
                 	obj.setName(value.getName()); //value.getName() -> phoneNumber
                 	oid = (ObjectIdentifierValue) value;
                     MibValueSymbol  symbol2 = oid.getSymbol();
+                    
                     SnmpObjectType snmpObj = (SnmpObjectType) symbol2.getType();
-                	//System.out.println(symbol2.getValue());
+                	
                     obj.setDescription(snmpObj.getDescription());
                 	obj.setValue(null);
-                		
-                	mibObjects.add(obj);
+                	
+                	if(snmpObj.getSyntax().toString().equals(new String("[APPLICATION 0] OCTET STRING (SIZE (4))"))){
+                    	obj.setSendable(false);
+                		ipObject = obj;
+                    } else if(snmpObj.getSyntax().toString().equals(new String("[UNIVERSAL 4] OCTET STRING (SIZE (0..6))"))){
+                    	obj.setSendable(false);
+                    	macObject = obj;
+                    }
+                    mibObjects.add(obj);
+                    
                 }
             }
         }
@@ -190,12 +204,22 @@ public class NodeObj {
 
 	public void setIp(String ip) {
 		this.ip = ip;
+		this.ipObject.setValue(ip);
 	}
 
 	public String getIp() {
 		return ip;
 	}
 
+	public String getMac() {
+		return mac;
+	}
+
+	public void setMac(String mac) {
+		this.mac = mac;
+		this.macObject.setValue(mac);
+	}
+	
 	public void setImage(String image) {
 		this.image = image;
 	}
