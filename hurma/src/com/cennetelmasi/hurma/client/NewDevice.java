@@ -77,7 +77,7 @@ public class NewDevice {
 		listBox.addItem("Telephone", "0.jpg");
 		listBox.addItem("Mobile Phone", "1.jpg");
 		listBox.addItem("Laptop", "2.jpg");
-		listBox.addItem("Scanner", "4.jpg");
+		listBox.addItem("Scanner", "3.jpg");
 		dialogHPanel[2].add(listBox);
 		dialogHPanel[2].add(images[0]);
 		listBox.addChangeHandler(new ChangeHandler() {
