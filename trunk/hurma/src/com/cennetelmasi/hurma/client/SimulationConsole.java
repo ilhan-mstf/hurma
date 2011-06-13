@@ -118,10 +118,10 @@ public class SimulationConsole implements EntryPoint {
     		@Override
 			public void run() {
     			second++;
-    			if(second >= 60){
+    			if(second >= 60) {
     				second = 0;
     				minute++;
-    				if(minute >= 60){
+    				if(minute >= 60) {
     					minute = 0;
     					hour++;
     				}
@@ -177,8 +177,9 @@ public class SimulationConsole implements EntryPoint {
 			    	if(simulation.getSimulationState().equals("running")) {
 			    		runText.append("> Simulation is going to continue...\n");
 						console.setText(runText.toString());
+						timer.run();
 						timer.scheduleRepeating(1000/cofactor);
-						serverTimer.scheduleRepeating(1000/cofactor);
+						serverTimer.scheduleRepeating(5000/cofactor);
 			    	} else if(simulation.getSimulationState().equals("paused")) {
 			    		runText.append("> Simulation was paused.\n");
 			    		console.setText(runText.toString());
@@ -198,7 +199,7 @@ public class SimulationConsole implements EntryPoint {
 	        simulation.createNodeValues(true, runText, console);
 	    	
 	        // Start simulation
-	        int time = Integer.parseInt(simulation.getSimulationDurationHour())*60 +
+	        int time = Integer.parseInt(simulation.getSimulationDurationHour())*3600 +
 	        		   Integer.parseInt(simulation.getSimulationDurationMinute())*60 +
 	        		   Integer.parseInt(simulation.getSimulationDurationSecond());
 	        
@@ -215,7 +216,7 @@ public class SimulationConsole implements EntryPoint {
 					runText.append("> Simulation is started successfully...\n");
 					console.setText(runText.toString());
 				timer.scheduleRepeating(1000/cofactor);
-				serverTimer.scheduleRepeating(1000/cofactor);
+				serverTimer.scheduleRepeating(5000/cofactor);
 				}
 			});
     	}
@@ -268,7 +269,7 @@ public class SimulationConsole implements EntryPoint {
             	buttons.remove(resumeButton);
             	buttons.insert(pauseButton, 0);
             	timer.scheduleRepeating(1000/cofactor);
-            	serverTimer.scheduleRepeating(1000/cofactor);
+            	serverTimer.scheduleRepeating(5000/cofactor);
             	stopButton.setEnabled(true);
             }
     	});
