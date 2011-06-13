@@ -21,8 +21,8 @@ public class NodeObj {
 	private int numberOfDevices;
 	private String ip;
 	private String mac;
-	private MIBObject ipObject;
-	private MIBObject macObject;
+	private MIBObject ipObject = new MIBObject();
+	private MIBObject macObject = new MIBObject();
 	private String nodeName;
 	private String image;
 	

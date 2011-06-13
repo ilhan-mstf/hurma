@@ -33,7 +33,7 @@ public class TopologyParser extends DefaultHandler{
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 		try {
 			SAXParser sp = spf.newSAXParser();
-			sp.parse(file, this);			
+			sp.parse(file, this);
 		} catch(SAXException se) {
 			se.printStackTrace();
 		} catch(ParserConfigurationException pce) {
@@ -77,6 +77,8 @@ public class TopologyParser extends DefaultHandler{
 			alarm.setFreq(frequency);
 			oid = "";
 			isAlarm = false;
+		} else if (qName.equalsIgnoreCase("simulationName")) {
+			topology.setName(tempVal);
 		} else if (qName.equalsIgnoreCase("duration")) {
 			topology.setDuration(tempVal);
 		} else if (qName.equalsIgnoreCase("simulationType")) {
@@ -100,9 +102,7 @@ public class TopologyParser extends DefaultHandler{
 			node.setIp(tempVal);
 		} else if (qName.equalsIgnoreCase("image")) {
 			node.setImage(tempVal);
-		} else if (qName.equalsIgnoreCase("simulationName")) {
-			node.setNodeName(tempVal);
-		}
+		} 
 	}
 
 	public static TopologyObject getTopology() {

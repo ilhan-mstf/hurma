@@ -36,6 +36,7 @@ public class SimulationEngine {
 	}
 	
 	public void start(int time, int cofactor) {
+		getProtocol().setPassedTime(0);
 		setSimulationState("running");
 		for(NodeObj node : nodes) {
 			SNMPagent agent = new SNMPagent("NODE", getProtocol(), node);
