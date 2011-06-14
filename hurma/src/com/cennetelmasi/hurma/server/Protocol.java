@@ -193,7 +193,7 @@ public class Protocol {
 		for (Object obj : alarm.getRequiredObjects()) {
 			MIBObject temp = node.getMibObjectByOid(obj.toString());
 			pdu.add(new VariableBinding(new OID(temp.getOid().toString()),
-					new OctetString(temp.getValue())));
+					new OctetString(temp.getDescription())));
 		}
 
 		// variable binding for Enterprise Specific objects, Severity
@@ -209,12 +209,13 @@ public class Protocol {
 		int hour = passedTime / 3600;
 		int minute = (passedTime - hour*3600) / 60;
 		int second = passedTime-minute*60 + hour*3600;
-		
+
 		Random rand = new Random();
-		
 		String str = hour + ":" + minute + ":" + second + " " + node.getNodeName() + " - " + node.getId() + " : "
 				+ trap.getNode().getAlarms().get(trap.getAlarmId()).getName() + 
 				" for the device " + getIpAt(node.getIp(), rand.nextInt(numberOfDevices))+ "\n";
+		
+		
 		log.append(str);
 		System.out.println("server: " + count + " " + alarm.getName() + " -- device " + node.getId()
 				+ " - Sending V2 Trap to " + ipAddress + " on Port " + port);
