@@ -152,8 +152,8 @@ public class Protocol {
 		for(int i = 3; i >= 0; i--){
 			ipsConverted[i] = Integer.parseInt(ips[i]) + node;
 			if(ipsConverted[i] > 255){
-				node = ipsConverted[i] - 255;
-				ipsConverted[i] = 255;
+				node = ipsConverted[i]/255;
+				ipsConverted[i] %= 255;
 			} else {
 				node = 0;
 			}
@@ -211,7 +211,7 @@ public class Protocol {
 		int second = passedTime-minute*60 + hour*3600;
 
 		Random rand = new Random();
-		String str = hour + ":" + minute + ":" + second + " " + node.getNodeName() + " - " + node.getId() + " : "
+		String str = timeFormat(hour) + ":" + timeFormat(minute) + ":" + timeFormat(second) + " " + node.getNodeName() + " - " + node.getId() + " : "
 				+ trap.getNode().getAlarms().get(trap.getAlarmId()).getName() + 
 				" for the device " + getIpAt(node.getIp(), rand.nextInt(numberOfDevices))+ "\n";
 		
@@ -224,6 +224,13 @@ public class Protocol {
 		snmp.close();
 	}
 
+	public String timeFormat(int val){
+		if(val < 10)
+			return "0" + val;
+		else
+			return Integer.toString(val);
+	}
+	
 	public void setLog(StringBuffer log) {
 		this.log = log;
 	}
