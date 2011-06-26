@@ -31,6 +31,13 @@ public class SNMPagent extends Thread {
 		this.setNode(node);
 	}
 
+	/**
+	 * Two different SNMP Agents are exist.
+	 * One type for nodes, the other for 
+	 * timer agent which calculates time
+	 * and sends traps.
+	 */
+	
 	public void run() {
 		if (getType().equals("TIMER")) {
 			try {
@@ -43,7 +50,7 @@ public class SNMPagent extends Thread {
 					try {
 						protocol.setPassedTime(protocol.getPassedTime()+5);
 						getProtocol().wakeUp();
-						// wait util deciding to sending traps
+						// wait until deciding to sending traps
 						sleep(100/getProtocol().getCofactor());
 						getProtocol().checkQueue();
 					} catch (IOException e) {
@@ -57,11 +64,13 @@ public class SNMPagent extends Thread {
 			scheduler.schedule(new Runnable() {
 				public void run() {
 					beeperHandle.cancel(true);
+					System.out.println("\n SERVER: simulation successfully ended.");
 				}
 			}, 1000*time/getProtocol().getCofactor(), TimeUnit.MILLISECONDS);
 		} else {
 			getProtocol().run(getNode());
 		}
+		
 		if(isStop()) return;
 	}
 	
@@ -97,13 +106,11 @@ public class SNMPagent extends Thread {
 	public NodeObj getNode() {
 		return node;
 	}
-
 	
 	public void setStop(boolean stop) {
 		this.stop = stop;
 	}
 
-	
 	public boolean isStop() {
 		return stop;
 	}
