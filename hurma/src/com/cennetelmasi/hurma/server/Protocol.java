@@ -11,6 +11,7 @@ import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.TransportMapping;
 import org.snmp4j.mp.SnmpConstants;
+import org.snmp4j.smi.IpAddress;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.UdpAddress;
@@ -23,18 +24,18 @@ public class Protocol {
 	CommunityTarget comtarget;
 	Snmp snmp;
 	
+	private String UdpAddress	= "127.0.0.1/0";
+	private String community 	= "public";
+	private String ipAddress 	= "127.0.0.1";
+	private int 	port 		= 8001;
+	
 	private int passedTime = 0;
-	
-	// initial values
+		
+	// cofactor is used for reduced time
 	private int cofactor;
-	
-	private String UdpAddress = "127.0.0.1/0";
-	private String community = "public";
-	private String ipAddress = "127.0.0.1";
-	private int port = 8001;
-
-	// shared values used by timer and node
 	final Random generator = new Random();
+	
+	// shared values used by timer and node
 	private Queue<Trap> alarmQueue = new LinkedList<Trap>();
 	private int count = 0;
 	private StringBuffer log = new StringBuffer();
@@ -42,50 +43,14 @@ public class Protocol {
 	public Protocol() {
 	}
 	
-	public float errorRateCalculation(float prob, int freq) {
-		int totalSeconds = 1;
-		switch (freq) {
-		case 0:
-			totalSeconds = 1;//seconds
-			break;
-		case 1:
-			totalSeconds = 60;//minute
-			break;
-		case 2://hour
-			totalSeconds = 60*60;
-			break;
-		case 3://day
-			totalSeconds = 60*60*24;
-			break;
-		case 4://week
-			totalSeconds = 60*60*24*7;
-			break;
-		case 5://month
-			totalSeconds = 60*60*24*30;
-			break;
-		case 6://year
-			totalSeconds = 60*60*24*365;
-			break;
-		}
-		return prob/totalSeconds;
-	}
-
-	public int getCofactor() {
-		return cofactor;
-	}
-
-	public void setCofactor(int cofactor) {
-		this.cofactor = cofactor;
-	}
-	
 	// NODE will execute this function during the simulation
 	public synchronized void run(NodeObj node) {
 		while (true) {
 			try {
-				System.out.println("server: device " + node.getId() + "- wait");
+				System.out.println("node: device " + node.getId() + "- wait");
 				wait();
 			} catch (InterruptedException e) {
-				System.err.println("server: ERROR- when waiting the thread: "
+				System.err.println("node: ERROR! when waiting the thread: "
 						+ node.getId());
 				e.printStackTrace();
 			}
@@ -99,7 +64,7 @@ public class Protocol {
 				float val = rand.nextFloat();
 
 				if(rate>=val){
-					System.out.println("server: device " + node.getId() + "- trap " + alarm.getName());
+					System.out.println("node: device " + node.getId() + "- trap " + alarm.getName());
 					alarmQueue.add(new Trap(node, iterator));
 				}
 				iterator++;
@@ -109,7 +74,7 @@ public class Protocol {
 
 	public synchronized void wakeUp() {
 		notifyAll();
-		System.out.println("server: timer- notify all");
+		System.out.println("timer: notify all");
 	}
 
 	public synchronized void checkQueue() throws IOException {
@@ -146,13 +111,13 @@ public class Protocol {
 		transport.close();
 	}
 
-	public String getIpAt(String base, int node){
+	public String getIpAt(String base, int node) {
 		String[] ips = base.split("\\.");
 		int[] ipsConverted = {0,0,0,0};
 		for(int i = 3; i >= 0; i--){
 			ipsConverted[i] = Integer.parseInt(ips[i]) + node;
 			if(ipsConverted[i] > 255){
-				node = ipsConverted[i]/255;
+				node = ipsConverted[i] / 255;
 				ipsConverted[i] %= 255;
 			} else {
 				node = 0;
@@ -162,9 +127,9 @@ public class Protocol {
 		return ipsConverted[0]+"."+ipsConverted[1]+"."+ipsConverted[2]+"."+ipsConverted[3]+"";
 	}
 	
-	public String generateMacAddress(){
+	public String generateMacAddress() {
 		String[] macs = {"","","","","",""};
-		for(int i = 0; i<6; i++){
+		for(int i = 0; i < 6; i++){
 			Random rand = new Random();
 			int a = rand.nextInt(255);
 			macs[i] = Integer.toHexString(a);
@@ -179,28 +144,31 @@ public class Protocol {
 		
 		String trapOID = alarm.getOid().toString();
 		String description = alarm.getDescription();
+		String ip = getIpAt(node.getIp(), generator.nextInt(numberOfDevices));
+		String mac = generateMacAddress();
 
 		// Create PDU for V2
 		PDU pdu = new PDU();
+		
 		// need to specify the system up time
 		pdu.add(new VariableBinding(SnmpConstants.sysUpTime, new OctetString(
 				new Date().toString())));
 		pdu.add(new VariableBinding(SnmpConstants.snmpTrapOID, new OID(trapOID)));
-//		pdu.add(new VariableBinding(SnmpConstants.snmpTrapAddress,
-//				new IpAddress(ipAddress)));
+		pdu.add(new VariableBinding(SnmpConstants.snmpTrapAddress,
+				new IpAddress(ipAddress)));
 
 		// add the required objects...
 		for (Object obj : alarm.getRequiredObjects()) {
 			MIBObject temp = node.getMibObjectByOid(obj.toString());
 			pdu.add(new VariableBinding(new OID(temp.getOid().toString()),
-					new OctetString(temp.getDescription())));
+					new OctetString(temp.getValue())));
 		}
 
 		// variable binding for Enterprise Specific objects, Severity
 		// (should be defined in MIB file)
 		pdu.add(new VariableBinding(new OID(trapOID), new OctetString(
 				description)));
-		pdu.setType(PDU.NOTIFICATION);
+		pdu.setType(PDU.TRAP);
 
 		// Send the PDU
 		snmp.send(pdu, comtarget);
@@ -208,29 +176,69 @@ public class Protocol {
 		
 		int hour = passedTime / 3600;
 		int minute = (passedTime - hour*3600) / 60;
-		int second = passedTime-minute*60 + hour*3600;
+		int second = passedTime - minute*60 - hour*3600;
 
-		Random rand = new Random();
 		String str = timeFormat(hour) + ":" + timeFormat(minute) + ":" + timeFormat(second) + " " + node.getNodeName() + " - " + node.getId() + " : "
 				+ trap.getNode().getAlarms().get(trap.getAlarmId()).getName() + 
-				" for the device " + getIpAt(node.getIp(), rand.nextInt(numberOfDevices))+ "\n";
-		
+				" for the device " + ip + "\n";
 		
 		log.append(str);
 		System.out.println("server: " + count + " " + alarm.getName() + " -- device " + node.getId()
-				+ " - Sending V2 Trap to " + ipAddress + " on Port " + port);
+							+ " - Sending V2 Trap to " + ipAddress + " on Port " + port);
 		// ResponseEvent respEv = snmp.send(pdu, comtarget);
 		// PDU response = respEv.getResponse();
-		snmp.close();
 	}
-
-	public String timeFormat(int val){
+	
+	public String timeFormat(int val) {
 		if(val < 10)
 			return "0" + val;
 		else
 			return Integer.toString(val);
 	}
 	
+	public float errorRateCalculation(float prob, int freq) {
+		int totalSeconds = 1;
+		switch (freq) {
+		//seconds
+		case 0:
+			totalSeconds = 1;
+			break;
+		//minute
+		case 1:
+			totalSeconds = 60;
+			break;
+		//hour
+		case 2:
+			totalSeconds = 60*60;
+			break;
+		//day
+		case 3:
+			totalSeconds = 60*60*24;
+			break;
+		//week
+		case 4:
+			totalSeconds = 60*60*24*7;
+			break;
+		//month
+		case 5:
+			totalSeconds = 60*60*24*30;
+			break;
+		//year
+		case 6:
+			totalSeconds = 60*60*24*365;
+			break;
+		}
+		return prob/totalSeconds;
+	}
+
+	public int getCofactor() {
+		return cofactor;
+	}
+
+	public void setCofactor(int cofactor) {
+		this.cofactor = cofactor;
+	}
+
 	public void setLog(StringBuffer log) {
 		this.log = log;
 	}

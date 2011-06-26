@@ -36,6 +36,9 @@ public class SimulationEngine {
 	}
 	
 	public void start(int time, int cofactor) {
+		// clear old values
+		agents.clear();
+		
 		getProtocol().setPassedTime(0);
 		setSimulationState("running");
 		for(NodeObj node : nodes) {
@@ -45,17 +48,23 @@ public class SimulationEngine {
 		}
 		timer = new SNMPagent("TIMER", getProtocol(), time, cofactor);
 		timer.start();
+		
 		System.out.println("SERVER: threads are created.");
+		System.out.println("\n- - simulation started - -\n");
 	}
 	
 	public void pause() {
 		setSimulationState("paused");
 		timer.pauseScheduler();
+		
+		System.out.println("\n- - simulation paused - -\n");
 	}
 	
 	public void resume() {
 		setSimulationState("running");
 		timer.resumeScheduler();
+		
+		System.out.println("\n- - simulation resumed - -\n");
 	}
 	
 	public void stop() {
@@ -64,15 +73,19 @@ public class SimulationEngine {
 		timer.setStop(true);
 		for(SNMPagent agent : agents)
 			agent.setStop(true);
+		
+		System.out.println("\n- - simulation stopped - -\n");
 	}
 	
 	public void clear() {
 		agents.clear();
 		nodes.clear();
+		
+		System.out.println("SERVER: nodes and agents are cleared.");
 	}
 	
 	/**
-	 *  <duration></duration>
+	   	<duration></duration>
 		<simulationType></simulationType>
 		<networkTopology>
 			<node>
@@ -219,7 +232,7 @@ public class SimulationEngine {
 	    byte buf[] = xmlString.getBytes();
 	    try {
 			f0 = new FileOutputStream(file);
-			for(int i=0; i<buf .length; i++) {
+			for(int i=0; i<buf.length; i++) {
 				f0.write(buf[i]); 
 			}
 			f0.close();
@@ -252,8 +265,10 @@ public class SimulationEngine {
 	}
 
 	public String getSimulationState() {
-		if(timer.getScheduler().isShutdown())
+		if(SNMPagent.getScheduler().isShutdown()) {
 			simulationState = "finished";
+			clear();
+		}
 		return simulationState;
 	}
 	
