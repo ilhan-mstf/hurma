@@ -130,10 +130,10 @@ public class Configuration implements EntryPoint {
             	simulation.setSimulationType(simulationTypeLB.getSelectedIndex());
             	simulation.setSimulationState("ready");
             	
-            	// TODO Create pop-up
             	SimulationConsole console = new SimulationConsole(simulation);
             	console.onModuleLoad();
                 
+            	runButton.setEnabled(false);
             }
     	});
     	    	

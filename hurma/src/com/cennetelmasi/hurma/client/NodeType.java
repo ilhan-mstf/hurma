@@ -20,7 +20,7 @@ public class NodeType implements EntryPoint {
 	private String icon;
 	
 	NodeType(String id, String name, String mib, String img, Simulation simulation) {
-		this.nodeTypeId = Integer.parseInt(id);
+		this.setNodeTypeId(Integer.parseInt(id));
 		this.nodeTypeName = name;
 		this.mib = mib;
 		this.simulation = simulation;
@@ -81,6 +81,14 @@ public class NodeType implements EntryPoint {
             	n.onModuleLoad();
             }
         });
+	}
+
+	public void setNodeTypeId(int nodeTypeId) {
+		this.nodeTypeId = nodeTypeId;
+	}
+
+	public int getNodeTypeId() {
+		return nodeTypeId;
 	}
 
 }

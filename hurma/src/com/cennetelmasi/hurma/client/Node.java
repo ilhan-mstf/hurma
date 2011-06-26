@@ -224,7 +224,7 @@ public class Node implements EntryPoint {
             	} else {
             		for(int i = 0; i < ips.length; i++){
             			try {
-            				int h = Integer.parseInt(ips[i]);
+            				Integer.parseInt(ips[i]);
             			} catch (NumberFormatException e){
             				Window.alert("Wrong IP format!");
             				return;
@@ -316,24 +316,6 @@ public class Node implements EntryPoint {
 		dialogBox.setText("Select alarms and fill required fields.");
 		dialogBox.setGlassEnabled(true);
 		dialogBox.setAnimationEnabled(true);
-		
-		/********************************************************************
-		 * DialogBox style													*
-		 * 																	*
-		 * V Panel-0														*
-		 * ---------------------------------------------------------------- *
-		 * H Panel-0														*
-		 * ---------------------------------------------------------------- *
-		 * V Panel-1		| V Panel-2										*
-		 * -Alarms...		| H Panel-1										*
-		 * -				| --------------------------------------------- *
-		 * -				| V Panel-3 	| V Panel-4 	| V Panel-5		*
-		 * -				|				|				|				*
-		 * -				|				|				|				*
-		 * ---------------------------------------------------------------- *
-		 * H Panel-3														*
-		 * OK, Cancel Buttons												*
-		 ********************************************************************/
 		
 		final VerticalPanel mainContainer = new VerticalPanel();
 		final VerticalPanel leftContainer = new VerticalPanel();
