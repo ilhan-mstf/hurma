@@ -149,7 +149,8 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 				size = requiredFields.size();
 				for(int i=0; i<size; i++) {
 					MIBObject obj = n.getMibObjectByOid(requiredFields.get(i++));
-					obj.setValue(requiredFields.get(i));
+					if(obj.isSendable())
+						obj.setValue(requiredFields.get(i));
 				}
 				System.out.println("SERVER: node values are set, node id: " + n.getId());
 			}
@@ -172,7 +173,6 @@ public class GreetingServiceImpl<NodeObject> extends RemoteServiceServlet implem
 	}
 
 	public void startSimulation(int time, int cofactor) {
-		System.out.println("server: simulation started.");
 		se.start(time, cofactor);
 	}
 

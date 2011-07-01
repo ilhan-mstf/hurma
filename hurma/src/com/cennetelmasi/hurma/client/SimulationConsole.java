@@ -63,7 +63,7 @@ public class SimulationConsole implements EntryPoint {
 		
 		// Console Options 
     	console.addStyleName("console");
-    	console.setWidth("600px");
+    	console.setWidth("700px");
     	console.setHeight("400px");
     	
     	buttons.add(pauseButton);
@@ -99,7 +99,7 @@ public class SimulationConsole implements EntryPoint {
 
 					@Override
 					public void onFailure(Throwable caught) {
-						runText.append("> ERROR getting outputs");
+						runText.append("> ERROR getting outputs\n");
 						console.setText(runText.toString());
 					}
 

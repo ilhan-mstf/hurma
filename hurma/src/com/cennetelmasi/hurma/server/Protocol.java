@@ -1,7 +1,6 @@
 package com.cennetelmasi.hurma.server;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
@@ -10,8 +9,9 @@ import org.snmp4j.CommunityTarget;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.TransportMapping;
+import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.mp.SnmpConstants;
-import org.snmp4j.smi.IpAddress;
+import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.UdpAddress;
@@ -19,15 +19,8 @@ import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
 public class Protocol {
-	// SNMP variables
-	TransportMapping transport;
-	CommunityTarget comtarget;
-	Snmp snmp;
-	
-	private String UdpAddress	= "127.0.0.1/0";
-	private String community 	= "public";
-	private String ipAddress 	= "127.0.0.1";
-	private int 	port 		= 8001;
+	private String 	ipAddress 	= "127.0.0.1";
+	private int 	port		= 163;
 	
 	private int passedTime = 0;
 		
@@ -89,28 +82,6 @@ public class Protocol {
 		return generator.nextBoolean();
 	}
 
-	public void initSNMP() throws IOException {
-		// Create Transport Mapping
-		transport = new DefaultUdpTransportMapping(new UdpAddress(UdpAddress));
-		transport.listen();
-
-		// Create Target
-		comtarget = new CommunityTarget();
-		comtarget.setCommunity(new OctetString(community));
-		comtarget.setVersion(SnmpConstants.version2c);
-		comtarget.setAddress(new UdpAddress(ipAddress + "/" + port));
-		comtarget.setRetries(2);
-		comtarget.setTimeout(3000);
-
-		// Create SNMP
-		snmp = new Snmp(transport);
-	}
-
-	public void closeSNMP() throws IOException {
-		snmp.close();
-		transport.close();
-	}
-
 	public String getIpAt(String base, int node) {
 		String[] ips = base.split("\\.");
 		int[] ipsConverted = {0,0,0,0};
@@ -143,50 +114,58 @@ public class Protocol {
 		int numberOfDevices = node.getNumberOfDevices();
 		
 		String trapOID = alarm.getOid().toString();
-		String description = alarm.getDescription();
 		String ip = getIpAt(node.getIp(), generator.nextInt(numberOfDevices));
 		String mac = generateMacAddress();
-
-		// Create PDU for V2
-		PDU pdu = new PDU();
 		
-		// need to specify the system up time
-		pdu.add(new VariableBinding(SnmpConstants.sysUpTime, new OctetString(
-				new Date().toString())));
-		pdu.add(new VariableBinding(SnmpConstants.snmpTrapOID, new OID(trapOID)));
-		pdu.add(new VariableBinding(SnmpConstants.snmpTrapAddress,
-				new IpAddress(ipAddress)));
-
-		// add the required objects...
-		for (Object obj : alarm.getRequiredObjects()) {
-			MIBObject temp = node.getMibObjectByOid(obj.toString());
-			pdu.add(new VariableBinding(new OID(temp.getOid().toString()),
-					new OctetString(temp.getValue())));
+		TransportMapping transport;
+		try {
+			transport = new DefaultUdpTransportMapping();
+		    Snmp snmp = new Snmp(transport);
+		    snmp.listen();
+	
+		    CommunityTarget target = new CommunityTarget();
+		    target.setCommunity(new OctetString("public"));
+		    target.setAddress(new UdpAddress("127.0.0.1" + "/" + port));
+		    target.setVersion(SnmpConstants.version2c);
+	
+		    PDU pdu = new PDU();
+		    pdu.setType(PDU.TRAP);
+		    // system time
+			pdu.add(new VariableBinding(new OID("1.3.6.1.2.1.1.3.0"), new Integer32(0)));
+			// oid
+			pdu.add(new VariableBinding(new OID("1.3.6.1.6.3.1.1.4.1.0"), new OID(trapOID)));
+			
+			// TODO when getIpObject and getMacObject are null, add condition???
+			pdu.add(new VariableBinding(new OID(node.getIpObject().getOid()), new OctetString(ip)));
+			pdu.add(new VariableBinding(new OID(node.getMacObject().getOid()), new OctetString(mac)));
+			
+			// add the required objects...
+			for (Object obj : alarm.getRequiredObjects()) {
+				MIBObject temp = node.getMibObjectByOid(obj.toString());
+				if(temp.isSendable())
+					pdu.add(new VariableBinding(new OID(temp.getOid().toString()),
+							new OctetString(temp.getValue())));
+			}
+	
+		    ResponseEvent responseEvent = snmp.send(pdu, target);
+		    snmp.close();
+		    count++;
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-
-		// variable binding for Enterprise Specific objects, Severity
-		// (should be defined in MIB file)
-		pdu.add(new VariableBinding(new OID(trapOID), new OctetString(
-				description)));
-		pdu.setType(PDU.TRAP);
-
-		// Send the PDU
-		snmp.send(pdu, comtarget);
-		count++;
 		
 		int hour = passedTime / 3600;
 		int minute = (passedTime - hour*3600) / 60;
 		int second = passedTime - minute*60 - hour*3600;
 
-		String str = timeFormat(hour) + ":" + timeFormat(minute) + ":" + timeFormat(second) + " " + node.getNodeName() + " - " + node.getId() + " : "
-				+ trap.getNode().getAlarms().get(trap.getAlarmId()).getName() + 
-				" for the device " + ip + "\n";
+		String str = timeFormat(hour) + ":" + timeFormat(minute) + ":" + timeFormat(second) + " " 
+					+ node.getNodeName() + " - " + node.getId() + " : "
+					+ trap.getNode().getAlarms().get(trap.getAlarmId()).getName() + 
+					" for the device " + ip + "\n";
 		
 		log.append(str);
 		System.out.println("server: " + count + " " + alarm.getName() + " -- device " + node.getId()
 							+ " - Sending V2 Trap to " + ipAddress + " on Port " + port);
-		// ResponseEvent respEv = snmp.send(pdu, comtarget);
-		// PDU response = respEv.getResponse();
 	}
 	
 	public String timeFormat(int val) {
