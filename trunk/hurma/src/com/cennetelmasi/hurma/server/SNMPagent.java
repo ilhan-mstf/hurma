@@ -40,11 +40,6 @@ public class SNMPagent extends Thread {
 	
 	public void run() {
 		if (getType().equals("TIMER")) {
-			try {
-				getProtocol().initSNMP();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
 			beeper = new Runnable() {
 				public void run() {
 					try {
@@ -64,7 +59,7 @@ public class SNMPagent extends Thread {
 			scheduler.schedule(new Runnable() {
 				public void run() {
 					beeperHandle.cancel(true);
-					System.out.println("\n SERVER: simulation successfully ended.");
+					System.out.println("\nSERVER: simulation successfully ended.");
 				}
 			}, 1000*time/getProtocol().getCofactor(), TimeUnit.MILLISECONDS);
 		} else {

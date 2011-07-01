@@ -38,8 +38,8 @@ public class NodeObj {
 	
 	public NodeObj(String MIB) throws IOException, MibLoaderException {
 		this.MIB = new String(MIB);
-		this.ipObject = new MIBObject();
-		this.macObject = new MIBObject();
+		this.setIpObject(new MIBObject());
+		this.setMacObject(new MIBObject());
 		this.mibObjects = new ArrayList<MIBObject>();
 		this.alarms = new ArrayList<Alarm>();
 		parseMIB();
@@ -115,10 +115,10 @@ public class NodeObj {
                 	
                 	if(snmpObj.getSyntax().toString().equals(new String("[APPLICATION 0] OCTET STRING (SIZE (4))"))){
                     	obj.setSendable(false);
-                		ipObject = obj;
+                		setIpObject(obj);
                     } else if(snmpObj.getSyntax().toString().equals(new String("[UNIVERSAL 4] OCTET STRING (SIZE (0..6))"))){
                     	obj.setSendable(false);
-                    	macObject = obj;
+                    	setMacObject(obj);
                     }
                     mibObjects.add(obj);
                     
@@ -204,7 +204,7 @@ public class NodeObj {
 
 	public void setIp(String ip) {
 		this.ip = ip;
-		this.ipObject.setValue(ip);
+		this.getIpObject().setValue(ip);
 	}
 
 	public String getIp() {
@@ -217,7 +217,7 @@ public class NodeObj {
 
 	public void setMac(String mac) {
 		this.mac = mac;
-		this.macObject.setValue(mac);
+		this.getMacObject().setValue(mac);
 	}
 	
 	public void setImage(String image) {
@@ -226,6 +226,22 @@ public class NodeObj {
 
 	public String getImage() {
 		return image;
+	}
+
+	public void setIpObject(MIBObject ipObject) {
+		this.ipObject = ipObject;
+	}
+
+	public MIBObject getIpObject() {
+		return ipObject;
+	}
+
+	public void setMacObject(MIBObject macObject) {
+		this.macObject = macObject;
+	}
+
+	public MIBObject getMacObject() {
+		return macObject;
 	}
 
 }
