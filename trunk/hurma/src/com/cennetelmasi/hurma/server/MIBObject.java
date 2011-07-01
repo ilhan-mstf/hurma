@@ -18,10 +18,10 @@ public class MIBObject {
 
 	public MIBObject() {
 		isSendable = true;
-		oid = null;
-		description = null;
-		type = null;
-		value = null;
+		oid = new String();
+		description = new String();
+		type = new String();
+		value = new String();
 	}
 	
 	public MIBObject(String oid, String description, String type, String value, boolean isIP) {
