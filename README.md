@@ -11,7 +11,7 @@ We are implementing Hurma in JAVA with using Google Web Toolkit which is a power
 This project is sponsored by Simens Enterprise Communication.
 
 Team:
-* M.Elgin Akpınar
+* Mehmet Elgin Akpınar
 * Osman Tahsin Berktaş
 * Mustafa İlhan [@mustilica](https://twitter.com/mustilica)
 
